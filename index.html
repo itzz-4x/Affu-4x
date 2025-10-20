@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NEET Practice Portal</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase SDK (use script option) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="firebase-config.js"></script> <!-- put your config here -->
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>NEET Practice Portal</h1>
+      <div id="userBadge" class="hidden"></div>
+    </header>
+
+    <main id="main">
+      <section id="enterSection">
+        <input id="studentName" placeholder="Enter your name" />
+        <button id="enterBtn">Enter</button>
+      </section>
+
+      <section id="weeksSection" class="hidden">
+        <h2>Weeks Schedule</h2>
+        <div id="weeksContainer" class="weeks-grid"></div>
+      </section>
+
+      <section id="examSection" class="hidden">
+        <div id="examHeader">
+          <button id="backToWeeks">← Back</button>
+          <h2 id="examTitle">Week</h2>
+          <div id="timer">Time: <span id="timeLeft">--:--</span></div>
+        </div>
+        <div id="questionArea"></div>
+        <div id="examControls">
+          <button id="prevQ">Previous</button>
+          <button id="skipQ">Skip</button>
+          <button id="nextQ">Next</button>
+          <button id="submitExam">Submit</button>
+        </div>
+      </section>
+
+      <section id="resultSection" class="hidden">
+        <h2>Result</h2>
+        <div id="resultContent"></div>
+        <button id="doneBtn">Done</button>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+  </html>
