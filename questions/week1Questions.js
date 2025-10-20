@@ -1800,3 +1800,5 @@ const week1Questions = [
     "answer": "Speed"
   }
 ];
+// YE LINE ADD KARNA
+window.week1Questions = week1Questions;
