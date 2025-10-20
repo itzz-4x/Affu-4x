@@ -1,0 +1,39 @@
+:root{
+  --bg1:#0f172a; --accent1:#06b6d4; --card:#0b1220;
+  --glass: rgba(255,255,255,0.04);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:Inter,system-ui,Arial,sans-serif;
+  background: linear-gradient(135deg,#071029 0%, #09203f 60%);
+  color:#e6eef6; min-height:100vh;
+}
+.wrap{max-width:920px;margin:24px auto;padding:18px;}
+header{display:flex;align-items:center;justify-content:space-between}
+h1{margin:0;font-size:20px}
+input{padding:12px;border-radius:10px;border:0;width:220px;background:#fff; color:#022}
+button{padding:10px 14px;border-radius:10px;border:0;background:var(--accent1);color:#022;cursor:pointer}
+.hidden{display:none}
+
+/* Weeks grid */
+.weeks-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px}
+.week-card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+.week-card.locked{opacity:.5;filter:grayscale(.2);cursor:not-allowed}
+.week-card.unlocked{border:1px solid rgba(255,255,255,0.06)}
+.week-card h3{margin:0 0 8px 0}
+.week-card p{margin:0 0 12px 0}
+.week-card button{background:#fff;color:#042;padding:8px 12px;border-radius:8px}
+
+/* Exam area */
+#questionArea{margin:16px 0;padding:18px;border-radius:12px;background:linear-gradient(180deg,#041224, #072137)}
+.q-card{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);margin-bottom:12px}
+.options{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.opt{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+.opt.selected{background:rgba(6,182,212,0.12);border-color:rgba(6,182,212,0.4)}
+#examControls{display:flex;gap:10px;justify-content:center;margin-top:10px}
+
+/* Result */
+#resultContent{background:linear-gradient(180deg,#061428,#0b2a3f);padding:16px;border-radius:10px}
+@media(max-width:600px){
+  input{width:140px}
+}
