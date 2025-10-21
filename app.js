@@ -25,6 +25,65 @@ let loadedQuestions = []; // questions for current week
 let currIndex = 0;
 let answers = []; // user chosen options
 
+// Timer variables
+let examTimer;
+let timeRemaining = 180 * 60; // 180 minutes (3 hours) in seconds
+
+// Timer functions
+function startTimer() {
+  clearInterval(examTimer);
+  timeRemaining = 180 * 60; // 3 hours in seconds
+  updateTimerDisplay();
+  
+  examTimer = setInterval(() => {
+    timeRemaining--;
+    updateTimerDisplay();
+    
+    // Warning at 30 minutes
+    if (timeRemaining === 30 * 60) {
+      alert("⚠️ 30 minutes remaining!");
+    }
+    
+    // Warning at 10 minutes  
+    if (timeRemaining === 10 * 60) {
+      alert("🚨 10 minutes remaining! Hurry up!");
+    }
+    
+    // Auto submit at 0
+    if (timeRemaining <= 0) {
+      clearInterval(examTimer);
+      alert("⏰ Time's up! Submitting your exam automatically...");
+      submitExam();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const hours = Math.floor(timeRemaining / 3600);
+  const minutes = Math.floor((timeRemaining % 3600) / 60);
+  const seconds = timeRemaining % 60;
+  
+  document.getElementById('timeDisplay').textContent = 
+    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+  // Color change for warnings
+  const timerElement = document.getElementById('timer');
+  if (timeRemaining <= 10 * 60) { // 10 minutes
+    timerElement.style.background = '#ffcccc';
+    timerElement.style.color = '#cc0000';
+  } else if (timeRemaining <= 30 * 60) { // 30 minutes
+    timerElement.style.background = '#fff0cc';
+    timerElement.style.color = '#cc6600';
+  } else {
+    timerElement.style.background = '#f0f8ff';
+    timerElement.style.color = '#000';
+  }
+}
+
+function stopTimer() {
+  clearInterval(examTimer);
+}
+
 // anonymous auth when entering (so we can have UID if needed)
 async function signInAnon(){
   try{
@@ -106,6 +165,9 @@ function loadWeek(weekNumber){
   weeksSection.classList.add('hidden');
   examSection.classList.remove('hidden');
 
+  // Start timer
+  startTimer();
+
   // load script
   const scriptId = 'weekScript';
   const old = document.getElementById(scriptId);
@@ -171,6 +233,7 @@ document.getElementById('skipQ').addEventListener('click', ()=>{
   if(currIndex < loadedQuestions.length-1){ currIndex++; renderQuestion(currIndex); }
 });
 backToWeeks.addEventListener('click', ()=>{
+  stopTimer();
   examSection.classList.add('hidden');
   weeksSection.classList.remove('hidden');
 });
@@ -179,6 +242,8 @@ backToWeeks.addEventListener('click', ()=>{
 document.getElementById('submitExam').addEventListener('click', submitExam);
 
 function submitExam(){
+  stopTimer();
+  
   if(!confirm("Submit your answers? You cannot change after submit.")) return;
   // calculate
   let correct=0, wrong=0, skipped=0;
@@ -227,6 +292,7 @@ function submitExam(){
 }
 
 doneBtn.addEventListener('click', ()=>{
+  stopTimer();
   resultSection.classList.add('hidden');
   weeksSection.classList.remove('hidden');
 });
