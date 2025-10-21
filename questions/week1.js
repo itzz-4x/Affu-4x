@@ -1,4 +1,4 @@
-const week1Questions = [
+window.week1Questions = [
   {
     "question": "Where is DNA located in eukaryotic cells? (1)",
     "options": [
