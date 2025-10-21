@@ -1,9 +1,4 @@
-// ✅ Start date for week 1 unlock
-const START_DATE = new Date("2025-10-20T00:00:00");
-const TOTAL_WEEKS = 20; 
-const QUESTIONS_PER_WEEK = 180;
-
-// 🧩 DOM elements
+// ====== DOM Elements ======
 const enterBtn = document.getElementById('enterBtn');
 const studentNameInput = document.getElementById('studentName');
 const enterSection = document.getElementById('enterSection');
@@ -19,14 +14,17 @@ const resultContent = document.getElementById('resultContent');
 const doneBtn = document.getElementById('doneBtn');
 const timerDisplay = document.getElementById('timer');
 
+const START_DATE = new Date("2025-10-20T00:00:00");
+const TOTAL_WEEKS = 20;
+
 let currentUser = null;
 let loadedQuestions = [];
 let currIndex = 0;
 let answers = [];
 let timerInterval;
-let totalSeconds = 180 * 60; // 3 hours timer
+let totalSeconds = 180*60; // 3 hours
 
-// ✅ Firebase anonymous login
+// ====== Firebase Anonymous Sign-in ======
 async function signInAnon(){
   try {
     const res = await auth.signInAnonymously();
@@ -37,7 +35,7 @@ async function signInAnon(){
   }
 }
 
-// ✅ Enter button
+// ====== Enter button logic ======
 enterBtn.addEventListener('click', async () => {
   const name = studentNameInput.value.trim();
   if(!name){ alert("Enter your name"); return; }
@@ -59,7 +57,7 @@ enterBtn.addEventListener('click', async () => {
   weeksSection.classList.remove('hidden');
 });
 
-// ✅ Week unlock logic
+// ====== Weeks Unlock Logic ======
 function weeksUnlockedCount(){
   const now = new Date();
   const diff = now - START_DATE;
@@ -90,16 +88,16 @@ function renderWeeks(){
   }
 }
 
-// ✅ Timer
+// ====== Timer ======
 function startTimer(){
   clearInterval(timerInterval);
-  totalSeconds = 180 * 60;
+  totalSeconds = 180*60;
   timerInterval = setInterval(() => {
-    const hrs = Math.floor(totalSeconds / 3600);
-    const mins = Math.floor((totalSeconds % 3600) / 60);
-    const secs = totalSeconds % 60;
+    const hrs = Math.floor(totalSeconds/3600);
+    const mins = Math.floor((totalSeconds%3600)/60);
+    const secs = totalSeconds%60;
     timerDisplay.textContent = `${hrs}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-    if(totalSeconds <= 0){
+    if(totalSeconds<=0){
       clearInterval(timerInterval);
       alert("⏰ Time’s up! Submitting automatically...");
       submitExam();
@@ -108,7 +106,7 @@ function startTimer(){
   }, 1000);
 }
 
-// ✅ Load questions dynamically
+// ====== Load Questions ======
 function loadWeek(weekNumber){
   loadedQuestions = [];
   answers = [];
@@ -143,7 +141,7 @@ function loadWeek(weekNumber){
   document.body.appendChild(s);
 }
 
-// ✅ Render each question
+// ====== Render Question ======
 function renderQuestion(index){
   if(!loadedQuestions || loadedQuestions.length===0){
     questionArea.innerHTML = `<p>No questions loaded.</p>`;
@@ -168,7 +166,7 @@ function renderQuestion(index){
   });
 }
 
-// ✅ Controls
+// ====== Controls ======
 document.getElementById('prevQ').addEventListener('click', ()=>{
   if(currIndex>0){ currIndex--; renderQuestion(currIndex); }
 });
@@ -185,16 +183,17 @@ backToWeeks.addEventListener('click', ()=>{
   clearInterval(timerInterval);
 });
 
-// ✅ Submit
+// ====== Submit Exam ======
 document.getElementById('submitExam').addEventListener('click', submitExam);
 
 function submitExam(){
   clearInterval(timerInterval);
   if(!confirm("Submit your answers?")) return;
+
   let correct=0, wrong=0, skipped=0;
   loadedQuestions.forEach((q, i)=>{
     const chosenIndex = answers[i];
-    if(chosenIndex === null || chosenIndex === undefined){ skipped++; return; }
+    if(chosenIndex===null || chosenIndex===undefined){ skipped++; return; }
     const chosenText = q.options[chosenIndex];
     if(chosenText === q.answer) correct++;
     else wrong++;
@@ -216,6 +215,7 @@ function submitExam(){
     <p>Percentage: ${percentage}%</p>
   `;
 
+  // ✅ Save to Firestore
   const uid = auth.currentUser ? auth.currentUser.uid : null;
   const name = sessionStorage.getItem('studentName') || 'Unknown';
   const payload = {
@@ -225,17 +225,19 @@ function submitExam(){
   };
   if(uid){
     db.collection('results').add(payload).catch(e=>console.error(e));
-    db.collection('students').doc(uid).set({ name, lastResult: payload }, { merge: true });
+    db.collection('students').doc(uid).set({ name, lastResult: payload, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
   }
 }
 
+// ====== Done Button ======
 doneBtn.addEventListener('click', ()=>{
   resultSection.classList.add('hidden');
   weeksSection.classList.remove('hidden');
 });
 
+// ====== Helper ======
 function escapeHtml(s){ 
   return String(s).replace(/[&<>"'`]/g, c => (
     {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]
   ));
-      }
+}
