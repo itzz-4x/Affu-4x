@@ -1,15 +1,17 @@
-// ✅ Start date for week 1 unlock
+// app.js
+// start date for week 1 unlock (your requirement): Monday 20 Oct 2025
 const START_DATE = new Date("2025-10-20T00:00:00");
-const TOTAL_WEEKS = 20; 
-const QUESTIONS_PER_WEEK = 180;
 
-// 🧩 DOM elements
+const TOTAL_WEEKS = 20; // change to 28 if needed
+const QUESTIONS_PER_WEEK = 180; // 90 bio, 45 chem, 45 phys (your plan)
+
 const enterBtn = document.getElementById('enterBtn');
 const studentNameInput = document.getElementById('studentName');
 const enterSection = document.getElementById('enterSection');
 const weeksSection = document.getElementById('weeksSection');
 const weeksContainer = document.getElementById('weeksContainer');
 const userBadge = document.getElementById('userBadge');
+
 const examSection = document.getElementById('examSection');
 const examTitle = document.getElementById('examTitle');
 const questionArea = document.getElementById('questionArea');
@@ -17,49 +19,50 @@ const backToWeeks = document.getElementById('backToWeeks');
 const resultSection = document.getElementById('resultSection');
 const resultContent = document.getElementById('resultContent');
 const doneBtn = document.getElementById('doneBtn');
-const timerDisplay = document.getElementById('timer');
 
 let currentUser = null;
-let loadedQuestions = [];
+let loadedQuestions = []; // questions for current week
 let currIndex = 0;
-let answers = [];
-let timerInterval;
-let totalSeconds = 180 * 60; // 3 hours timer
+let answers = []; // user chosen options
 
-// ✅ Firebase anonymous login
+// anonymous auth when entering (so we can have UID if needed)
 async function signInAnon(){
-  try {
+  try{
     const res = await auth.signInAnonymously();
     return res.user;
-  } catch(e){
+  }catch(e){
     console.warn("Anonymous sign-in failed:", e);
     return null;
   }
 }
 
-// ✅ Enter button
 enterBtn.addEventListener('click', async () => {
   const name = studentNameInput.value.trim();
   if(!name){ alert("Enter your name"); return; }
 
+  // save in session
   sessionStorage.setItem('studentName', name);
+
+  // show badge
   userBadge.textContent = `Hello, ${name}`;
   userBadge.classList.remove('hidden');
 
+  // sign in anonymously to get uid
   currentUser = await signInAnon();
   if(currentUser){
+    // save name in firestore under collection 'students' with doc = uid
     db.collection('students').doc(currentUser.uid).set({
       name,
       lastSeen: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
   }
 
+  // hide enter, show weeks
   enterSection.classList.add('hidden');
   renderWeeks();
   weeksSection.classList.remove('hidden');
 });
 
-// ✅ Week unlock logic
 function weeksUnlockedCount(){
   const now = new Date();
   const diff = now - START_DATE;
@@ -77,7 +80,8 @@ function renderWeeks(){
   for(let i=1;i<=TOTAL_WEEKS;i++){
     const card = document.createElement('div');
     card.className = 'week-card ' + (isWeekUnlocked(i) ? 'unlocked' : 'locked');
-    card.innerHTML = `<h3>Week ${i}</h3><p>Weekly Practice Test</p>`;
+    card.innerHTML = `<h3>Week ${i}</h3>
+                      <p>${i<=10? 'PUC 1 topics' : (i<=20? 'PUC 2 topics' : 'Revision')}</p>`;
     const btn = document.createElement('button');
     btn.textContent = isWeekUnlocked(i) ? 'Start Exam' : 'Locked';
     if(isWeekUnlocked(i)){
@@ -90,26 +94,10 @@ function renderWeeks(){
   }
 }
 
-// ✅ Timer
-function startTimer(){
-  clearInterval(timerInterval);
-  totalSeconds = 180 * 60;
-  timerInterval = setInterval(() => {
-    const hrs = Math.floor(totalSeconds / 3600);
-    const mins = Math.floor((totalSeconds % 3600) / 60);
-    const secs = totalSeconds % 60;
-    timerDisplay.textContent = `${hrs}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-    if(totalSeconds <= 0){
-      clearInterval(timerInterval);
-      alert("⏰ Time’s up! Submitting automatically...");
-      submitExam();
-    }
-    totalSeconds--;
-  }, 1000);
-}
-
-// ✅ Load questions dynamically
+// dynamic load questions file: expects file at `questions/week{n}.js`
+// which should set global `week{n}Questions`
 function loadWeek(weekNumber){
+  // clear previous
   loadedQuestions = [];
   answers = [];
   currIndex = 0;
@@ -118,6 +106,7 @@ function loadWeek(weekNumber){
   weeksSection.classList.add('hidden');
   examSection.classList.remove('hidden');
 
+  // load script
   const scriptId = 'weekScript';
   const old = document.getElementById(scriptId);
   if(old) old.remove();
@@ -126,13 +115,15 @@ function loadWeek(weekNumber){
   s.id = scriptId;
   s.src = `questions/week${weekNumber}.js`;
   s.onload = () => {
+    // after load, the file must define global variable `week{weekNumber}Questions`
     const varName = `week${weekNumber}Questions`;
+    // eslint-disable-next-line no-undef
     if(window[varName] && Array.isArray(window[varName]) && window[varName].length>=1){
-      loadedQuestions = window[varName].slice();
+      loadedQuestions = window[varName].slice(); // copy
+      // init answers
       answers = new Array(loadedQuestions.length).fill(null);
       currIndex = 0;
       renderQuestion(currIndex);
-      startTimer();
     } else {
       questionArea.innerHTML = `<p style="color:#f88">Questions file not found or invalid. Place questions/week${weekNumber}.js and set ${varName} array.</p>`;
     }
@@ -143,7 +134,6 @@ function loadWeek(weekNumber){
   document.body.appendChild(s);
 }
 
-// ✅ Render each question
 function renderQuestion(index){
   if(!loadedQuestions || loadedQuestions.length===0){
     questionArea.innerHTML = `<p>No questions loaded.</p>`;
@@ -159,6 +149,7 @@ function renderQuestion(index){
     </div>
     <div style="text-align:center"><small>Question ${index+1} of ${loadedQuestions.length}</small></div>
   `;
+  // attach click handlers on options
   document.querySelectorAll('.opt').forEach(el=>{
     el.addEventListener('click', ()=>{
       const idx = parseInt(el.getAttribute('data-idx'));
@@ -168,7 +159,7 @@ function renderQuestion(index){
   });
 }
 
-// ✅ Controls
+// controls
 document.getElementById('prevQ').addEventListener('click', ()=>{
   if(currIndex>0){ currIndex--; renderQuestion(currIndex); }
 });
@@ -182,15 +173,14 @@ document.getElementById('skipQ').addEventListener('click', ()=>{
 backToWeeks.addEventListener('click', ()=>{
   examSection.classList.add('hidden');
   weeksSection.classList.remove('hidden');
-  clearInterval(timerInterval);
 });
 
-// ✅ Submit
+// submit
 document.getElementById('submitExam').addEventListener('click', submitExam);
 
 function submitExam(){
-  clearInterval(timerInterval);
-  if(!confirm("Submit your answers?")) return;
+  if(!confirm("Submit your answers? You cannot change after submit.")) return;
+  // calculate
   let correct=0, wrong=0, skipped=0;
   loadedQuestions.forEach((q, i)=>{
     const chosenIndex = answers[i];
@@ -199,11 +189,11 @@ function submitExam(){
     if(chosenText === q.answer) correct++;
     else wrong++;
   });
-
   const attempted = correct + wrong;
   const marks = correct*4 + wrong*(-1);
-  const percentage = +(marks/720*100).toFixed(2);
+  const percentage = +(marks/720*100).toFixed(2); // total marks 720
 
+  // show result
   examSection.classList.add('hidden');
   resultSection.classList.remove('hidden');
   resultContent.innerHTML = `
@@ -216,6 +206,7 @@ function submitExam(){
     <p>Percentage: ${percentage}%</p>
   `;
 
+  // save to Firestore if auth available
   const uid = auth.currentUser ? auth.currentUser.uid : null;
   const name = sessionStorage.getItem('studentName') || 'Unknown';
   const payload = {
@@ -224,8 +215,14 @@ function submitExam(){
     ts: firebase.firestore.FieldValue.serverTimestamp()
   };
   if(uid){
-    db.collection('results').add(payload).catch(e=>console.error(e));
-    db.collection('students').doc(uid).set({ name, lastResult: payload }, { merge: true });
+    db.collection('results').add(payload).then(()=> console.log('Saved')).catch(e=>console.error(e));
+    // also update student's latest record
+    db.collection('students').doc(uid).set({
+      name, lastResult: payload
+    }, { merge: true });
+  } else {
+    // still try to save without uid
+    db.collection('results').add(payload).then(()=> console.log('Saved (no uid)')).catch(e=>console.error(e));
   }
 }
 
@@ -234,8 +231,5 @@ doneBtn.addEventListener('click', ()=>{
   weeksSection.classList.remove('hidden');
 });
 
-function escapeHtml(s){ 
-  return String(s).replace(/[&<>"'`]/g, c => (
-    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]
-  ));
-}
+// helper
+function escapeHtml(s){ return String(s).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'})[c]); }
