@@ -40,7 +40,10 @@ async function signInAnon() {
 // ✅ Enter button
 enterBtn.addEventListener('click', async () => {
   const name = studentNameInput.value.trim();
-  if (!name) { alert("Enter your name"); return; }
+  if (!name) {
+    alert("Enter your name");
+    return;
+  }
 
   sessionStorage.setItem('studentName', name);
   userBadge.textContent = `Hello, ${name}`;
@@ -48,7 +51,7 @@ enterBtn.addEventListener('click', async () => {
 
   currentUser = await signInAnon();
   if (currentUser) {
-    db.collection('Students').doc(currentUser.uid).set({
+    await db.collection('Students').doc(currentUser.uid).set({
       Name: name,
       LastSeen: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
@@ -134,7 +137,7 @@ function loadWeek(weekNumber) {
       renderQuestion(currIndex);
       startTimer();
     } else {
-      questionArea.innerHTML = `<p style="color:#f88">Questions file not found or invalid. Place questions/week${weekNumber}.js and set ${varName} array.</p>`;
+      questionArea.innerHTML = `<p style="color:#f88">Questions file not found or invalid.</p>`;
     }
   };
   s.onerror = () => {
@@ -188,9 +191,10 @@ backToWeeks.addEventListener('click', () => {
 // ✅ Submit
 document.getElementById('submitExam').addEventListener('click', submitExam);
 
-function submitExam() {
+async function submitExam() {
   clearInterval(timerInterval);
   if (!confirm("Submit your answers?")) return;
+
   let correct = 0, wrong = 0, skipped = 0;
   loadedQuestions.forEach((q, i) => {
     const chosenIndex = answers[i];
@@ -217,22 +221,26 @@ function submitExam() {
     <p>Percentage: ${percentage}%</p>
   `;
 
-  const payload = {
-    Name: name,
-    Week: parseInt(examTitle.textContent.replace(/[^0-9]/g, '')),
-    Correct: correct,
-    Wrong: wrong,
-    Skipped: skipped,
-    Attempted: attempted,
-    Marks: marks,
-    Percentage: percentage,
-    Timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  };
-
-  // ✅ Save result in Firestore
-  db.collection('Students').add(payload)
-    .then(() => console.log("✅ Result saved to Firestore"))
-    .catch(e => console.error("❌ Error saving:", e));
+  try {
+    if (currentUser) {
+      await db.collection('Students').doc(currentUser.uid).collection('Results').add({
+        Name: name,
+        Week: parseInt(examTitle.textContent.replace(/[^0-9]/g, '')),
+        Correct: correct,
+        Wrong: wrong,
+        Skipped: skipped,
+        Attempted: attempted,
+        Marks: marks,
+        Percentage: percentage,
+        Timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      console.log("✅ Result saved successfully!");
+    } else {
+      console.error("⚠️ No user signed in");
+    }
+  } catch (err) {
+    console.error("❌ Firestore save error:", err);
+  }
 }
 
 doneBtn.addEventListener('click', () => {
@@ -244,4 +252,4 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"'`]/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c]
   ));
-  }
+      }
