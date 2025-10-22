@@ -1,6 +1,6 @@
 // ✅ Start date for week 1 unlock
 const START_DATE = new Date("2025-10-20T00:00:00");
-const TOTAL_WEEKS = 20; 
+const TOTAL_WEEKS = 20;
 const QUESTIONS_PER_WEEK = 180;
 
 // 🧩 DOM elements
@@ -27,11 +27,11 @@ let timerInterval;
 let totalSeconds = 180 * 60; // 3 hours timer
 
 // ✅ Firebase anonymous login
-async function signInAnon(){
+async function signInAnon() {
   try {
     const res = await auth.signInAnonymously();
     return res.user;
-  } catch(e){
+  } catch (e) {
     console.warn("Anonymous sign-in failed:", e);
     return null;
   }
@@ -40,17 +40,17 @@ async function signInAnon(){
 // ✅ Enter button
 enterBtn.addEventListener('click', async () => {
   const name = studentNameInput.value.trim();
-  if(!name){ alert("Enter your name"); return; }
+  if (!name) { alert("Enter your name"); return; }
 
   sessionStorage.setItem('studentName', name);
   userBadge.textContent = `Hello, ${name}`;
   userBadge.classList.remove('hidden');
 
   currentUser = await signInAnon();
-  if(currentUser){
-    db.collection('students').doc(currentUser.uid).set({
-      name,
-      lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+  if (currentUser) {
+    db.collection('Students').doc(currentUser.uid).set({
+      Name: name,
+      LastSeen: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
   }
 
@@ -60,28 +60,28 @@ enterBtn.addEventListener('click', async () => {
 });
 
 // ✅ Week unlock logic
-function weeksUnlockedCount(){
+function weeksUnlockedCount() {
   const now = new Date();
   const diff = now - START_DATE;
-  if(diff < 0) return 0;
-  const weeks = Math.floor(diff / (7*24*60*60*1000)) + 1;
+  if (diff < 0) return 0;
+  const weeks = Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
   return Math.max(0, Math.min(weeks, TOTAL_WEEKS));
 }
 
-function isWeekUnlocked(weekNumber){
+function isWeekUnlocked(weekNumber) {
   return weekNumber <= weeksUnlockedCount();
 }
 
-function renderWeeks(){
+function renderWeeks() {
   weeksContainer.innerHTML = '';
-  for(let i=1;i<=TOTAL_WEEKS;i++){
+  for (let i = 1; i <= TOTAL_WEEKS; i++) {
     const card = document.createElement('div');
     card.className = 'week-card ' + (isWeekUnlocked(i) ? 'unlocked' : 'locked');
     card.innerHTML = `<h3>Week ${i}</h3><p>Weekly Practice Test</p>`;
     const btn = document.createElement('button');
     btn.textContent = isWeekUnlocked(i) ? 'Start Exam' : 'Locked';
-    if(isWeekUnlocked(i)){
-      btn.addEventListener('click', ()=> loadWeek(i));
+    if (isWeekUnlocked(i)) {
+      btn.addEventListener('click', () => loadWeek(i));
     } else {
       btn.disabled = true;
     }
@@ -91,15 +91,15 @@ function renderWeeks(){
 }
 
 // ✅ Timer
-function startTimer(){
+function startTimer() {
   clearInterval(timerInterval);
   totalSeconds = 180 * 60;
   timerInterval = setInterval(() => {
     const hrs = Math.floor(totalSeconds / 3600);
     const mins = Math.floor((totalSeconds % 3600) / 60);
     const secs = totalSeconds % 60;
-    timerDisplay.textContent = `${hrs}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-    if(totalSeconds <= 0){
+    timerDisplay.textContent = `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    if (totalSeconds <= 0) {
       clearInterval(timerInterval);
       alert("⏰ Time’s up! Submitting automatically...");
       submitExam();
@@ -109,7 +109,7 @@ function startTimer(){
 }
 
 // ✅ Load questions dynamically
-function loadWeek(weekNumber){
+function loadWeek(weekNumber) {
   loadedQuestions = [];
   answers = [];
   currIndex = 0;
@@ -120,14 +120,14 @@ function loadWeek(weekNumber){
 
   const scriptId = 'weekScript';
   const old = document.getElementById(scriptId);
-  if(old) old.remove();
+  if (old) old.remove();
 
   const s = document.createElement('script');
   s.id = scriptId;
   s.src = `questions/week${weekNumber}.js`;
   s.onload = () => {
     const varName = `week${weekNumber}Questions`;
-    if(window[varName] && Array.isArray(window[varName]) && window[varName].length>=1){
+    if (window[varName] && Array.isArray(window[varName]) && window[varName].length >= 1) {
       loadedQuestions = window[varName].slice();
       answers = new Array(loadedQuestions.length).fill(null);
       currIndex = 0;
@@ -144,23 +144,23 @@ function loadWeek(weekNumber){
 }
 
 // ✅ Render each question
-function renderQuestion(index){
-  if(!loadedQuestions || loadedQuestions.length===0){
+function renderQuestion(index) {
+  if (!loadedQuestions || loadedQuestions.length === 0) {
     questionArea.innerHTML = `<p>No questions loaded.</p>`;
     return;
   }
   const q = loadedQuestions[index];
   questionArea.innerHTML = `
     <div class="q-card">
-      <div><strong>Q ${index+1}.</strong> ${escapeHtml(q.question)}</div>
+      <div><strong>Q ${index + 1}.</strong> ${escapeHtml(q.question)}</div>
       <div class="options">
-        ${q.options.map((opt,i)=>`<div class="opt ${answers[index]===i? 'selected':''}" data-idx="${i}">${String.fromCharCode(65+i)}. ${escapeHtml(opt)}</div>`).join('')}
+        ${q.options.map((opt, i) => `<div class="opt ${answers[index] === i ? 'selected' : ''}" data-idx="${i}">${String.fromCharCode(65 + i)}. ${escapeHtml(opt)}</div>`).join('')}
       </div>
     </div>
-    <div style="text-align:center"><small>Question ${index+1} of ${loadedQuestions.length}</small></div>
+    <div style="text-align:center"><small>Question ${index + 1} of ${loadedQuestions.length}</small></div>
   `;
-  document.querySelectorAll('.opt').forEach(el=>{
-    el.addEventListener('click', ()=>{
+  document.querySelectorAll('.opt').forEach(el => {
+    el.addEventListener('click', () => {
       const idx = parseInt(el.getAttribute('data-idx'));
       answers[index] = idx;
       renderQuestion(index);
@@ -169,17 +169,17 @@ function renderQuestion(index){
 }
 
 // ✅ Controls
-document.getElementById('prevQ').addEventListener('click', ()=>{
-  if(currIndex>0){ currIndex--; renderQuestion(currIndex); }
+document.getElementById('prevQ').addEventListener('click', () => {
+  if (currIndex > 0) { currIndex--; renderQuestion(currIndex); }
 });
-document.getElementById('nextQ').addEventListener('click', ()=>{
-  if(currIndex < loadedQuestions.length-1){ currIndex++; renderQuestion(currIndex); }
+document.getElementById('nextQ').addEventListener('click', () => {
+  if (currIndex < loadedQuestions.length - 1) { currIndex++; renderQuestion(currIndex); }
 });
-document.getElementById('skipQ').addEventListener('click', ()=>{
+document.getElementById('skipQ').addEventListener('click', () => {
   answers[currIndex] = null;
-  if(currIndex < loadedQuestions.length-1){ currIndex++; renderQuestion(currIndex); }
+  if (currIndex < loadedQuestions.length - 1) { currIndex++; renderQuestion(currIndex); }
 });
-backToWeeks.addEventListener('click', ()=>{
+backToWeeks.addEventListener('click', () => {
   examSection.classList.add('hidden');
   weeksSection.classList.remove('hidden');
   clearInterval(timerInterval);
@@ -188,26 +188,27 @@ backToWeeks.addEventListener('click', ()=>{
 // ✅ Submit
 document.getElementById('submitExam').addEventListener('click', submitExam);
 
-function submitExam(){
+function submitExam() {
   clearInterval(timerInterval);
-  if(!confirm("Submit your answers?")) return;
-  let correct=0, wrong=0, skipped=0;
-  loadedQuestions.forEach((q, i)=>{
+  if (!confirm("Submit your answers?")) return;
+  let correct = 0, wrong = 0, skipped = 0;
+  loadedQuestions.forEach((q, i) => {
     const chosenIndex = answers[i];
-    if(chosenIndex === null || chosenIndex === undefined){ skipped++; return; }
+    if (chosenIndex === null || chosenIndex === undefined) { skipped++; return; }
     const chosenText = q.options[chosenIndex];
-    if(chosenText === q.answer) correct++;
+    if (chosenText === q.answer) correct++;
     else wrong++;
   });
 
   const attempted = correct + wrong;
-  const marks = correct*4 + wrong*(-1);
-  const percentage = +(marks/720*100).toFixed(2);
+  const marks = correct * 4 + wrong * (-1);
+  const percentage = +(marks / 720 * 100).toFixed(2);
+  const name = sessionStorage.getItem('studentName') || 'Unknown';
 
   examSection.classList.add('hidden');
   resultSection.classList.remove('hidden');
   resultContent.innerHTML = `
-    <p>Name: ${escapeHtml(sessionStorage.getItem('studentName')||'Unknown')}</p>
+    <p>Name: ${escapeHtml(name)}</p>
     <p>Correct: ${correct}</p>
     <p>Wrong: ${wrong}</p>
     <p>Skipped: ${skipped}</p>
@@ -216,26 +217,31 @@ function submitExam(){
     <p>Percentage: ${percentage}%</p>
   `;
 
-  const uid = auth.currentUser ? auth.currentUser.uid : null;
-  const name = sessionStorage.getItem('studentName') || 'Unknown';
   const payload = {
-    name, week: parseInt(examTitle.textContent.replace(/[^0-9]/g,'')),
-    attempted, correct, wrong, skipped, marks, percentage,
-    ts: firebase.firestore.FieldValue.serverTimestamp()
+    Name: name,
+    Week: parseInt(examTitle.textContent.replace(/[^0-9]/g, '')),
+    Correct: correct,
+    Wrong: wrong,
+    Skipped: skipped,
+    Attempted: attempted,
+    Marks: marks,
+    Percentage: percentage,
+    Timestamp: firebase.firestore.FieldValue.serverTimestamp()
   };
-  if(uid){
-    db.collection('results').add(payload).catch(e=>console.error(e));
-    db.collection('students').doc(uid).set({ name, lastResult: payload }, { merge: true });
-  }
+
+  // ✅ Save result in Firestore
+  db.collection('Students').add(payload)
+    .then(() => console.log("✅ Result saved to Firestore"))
+    .catch(e => console.error("❌ Error saving:", e));
 }
 
-doneBtn.addEventListener('click', ()=>{
+doneBtn.addEventListener('click', () => {
   resultSection.classList.add('hidden');
   weeksSection.classList.remove('hidden');
 });
 
-function escapeHtml(s){ 
+function escapeHtml(s) {
   return String(s).replace(/[&<>"'`]/g, c => (
-    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c]
   ));
-}
+  }
