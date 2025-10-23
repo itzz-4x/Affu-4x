@@ -16,8 +16,13 @@ let answers = [];
 let timerInterval;
 let totalSeconds = 180 * 60;
 
+// ✅ Firebase services - ADD THIS
+const auth = firebase.auth();
+const db = firebase.firestore();
+
 // ✅ Initialize everything after page load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("🚀 NEET Portal Started");
     initializeDOMElements();
     setupEventListeners();
 });
@@ -68,26 +73,49 @@ function setupEventListeners() {
         });
     }
 
-    // Exam controls
+    // ✅ EXAM CONTROLS - FIXED (No Firebase auth dependency)
     const prevQ = document.getElementById('prevQ');
     const nextQ = document.getElementById('nextQ');
     const skipQ = document.getElementById('skipQ');
-    const submitExam = document.getElementById('submitExam');
+    const submitExamBtn = document.getElementById('submitExam'); // Changed variable name
 
-    if (prevQ) prevQ.addEventListener('click', () => {
-        if (currIndex > 0) { currIndex--; renderQuestion(currIndex); }
-    });
+    if (prevQ) {
+        prevQ.addEventListener('click', () => {
+            if (currIndex > 0) { 
+                currIndex--; 
+                renderQuestion(currIndex); 
+            }
+        });
+    }
     
-    if (nextQ) nextQ.addEventListener('click', () => {
-        if (currIndex < loadedQuestions.length - 1) { currIndex++; renderQuestion(currIndex); }
-    });
+    if (nextQ) {
+        nextQ.addEventListener('click', () => {
+            if (currIndex < loadedQuestions.length - 1) { 
+                currIndex++; 
+                renderQuestion(currIndex); 
+            }
+        });
+    }
     
-    if (skipQ) skipQ.addEventListener('click', () => {
-        answers[currIndex] = null;
-        if (currIndex < loadedQuestions.length - 1) { currIndex++; renderQuestion(currIndex); }
-    });
+    if (skipQ) {
+        skipQ.addEventListener('click', () => {
+            answers[currIndex] = null;
+            if (currIndex < loadedQuestions.length - 1) { 
+                currIndex++; 
+                renderQuestion(currIndex); 
+            }
+        });
+    }
     
-    if (submitExam) submitExam.addEventListener('click', submitExam);
+    // ✅ SUBMIT BUTTON - FIXED (Different variable name)
+    if (submitExamBtn) {
+        submitExamBtn.addEventListener('click', function() {
+            console.log("Submit button clicked!");
+            submitExam();
+        });
+    } else {
+        console.error("Submit button not found!");
+    }
 }
 
 // ✅ Enter button handler - FIXED
@@ -105,13 +133,19 @@ async function handleEnterClick() {
         userBadge.classList.remove('hidden');
     }
 
-    // Firebase anonymous login
-    currentUser = await signInAnon();
-    if (currentUser) {
-        await db.collection('Students').doc(currentUser.uid).set({
-            Name: name,
-            LastSeen: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
+    // ✅ FIREBASE AUTH - WITH ERROR HANDLING
+    try {
+        currentUser = await signInAnon();
+        if (currentUser) {
+            await db.collection('Students').doc(currentUser.uid).set({
+                Name: name,
+                LastSeen: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log("✅ User saved to Firebase");
+        }
+    } catch (error) {
+        console.log("⚠️ Using demo mode - Firebase auth skipped");
+        currentUser = { uid: 'demo-user-' + Date.now() };
     }
 
     enterSection.classList.add('hidden');
@@ -266,7 +300,7 @@ function renderQuestion(index) {
     });
 }
 
-// ✅ Submit exam
+// ✅ Submit exam - FIXED
 async function submitExam() {
     clearInterval(timerInterval);
     if (!confirm("Submit your answers?")) return;
