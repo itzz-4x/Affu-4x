@@ -1,6 +1,6 @@
 // ✅ Start date for week 1 unlock
 const START_DATE = new Date("2025-10-20T00:00:00");
-const TOTAL_WEEKS = 28;
+const TOTAL_WEEKS = 28; // ✅ 20 se 28 kardia
 const QUESTIONS_PER_WEEK = 180;
 
 // 🧩 DOM elements
@@ -210,7 +210,7 @@ function updateTimerDisplay() {
     }
 }
 
-// ✅ Load questions dynamically - FIXED TO LOAD EXTERNAL FILES
+// ✅ Load questions dynamically - ONLY EXTERNAL FILES (NO TEMPORARY QUESTIONS)
 function loadWeek(weekNumber) {
     console.log(`Loading week ${weekNumber} from external file...`);
     
@@ -243,39 +243,28 @@ function loadWeek(weekNumber) {
             console.log(`✅ Loaded ${loadedQuestions.length} questions from week${weekNumber}.js`);
         } else {
             console.error(`Questions not found in ${varName}`);
-            // Fallback to temporary questions
-            loadTemporaryQuestions(weekNumber);
+            questionArea.innerHTML = `
+                <div style="text-align: center; padding: 50px;">
+                    <h3>⚠️ Questions Not Available</h3>
+                    <p>Week ${weekNumber} questions file is not found or empty.</p>
+                    <p>Please contact administrator.</p>
+                </div>
+            `;
         }
     };
     
     s.onerror = function() {
         console.error(`Failed to load questions/week${weekNumber}.js`);
-        // Fallback to temporary questions if file not found
-        loadTemporaryQuestions(weekNumber);
+        questionArea.innerHTML = `
+            <div style="text-align: center; padding: 50px;">
+                <h3>⚠️ File Not Found</h3>
+                <p>questions/week${weekNumber}.js file not found.</p>
+                <p>Please make sure the questions file exists.</p>
+            </div>
+        `;
     };
     
     document.head.appendChild(s);
-}
-
-// ✅ Fallback temporary questions
-function loadTemporaryQuestions(weekNumber) {
-    console.log(`Using temporary questions for week ${weekNumber}`);
-    loadedQuestions = [
-        {
-            question: `Week ${weekNumber}: What is the basic unit of life?`,
-            options: ["Cell", "Atom", "Molecule", "Tissue"],
-            answer: "Cell"
-        },
-        {
-            question: `Week ${weekNumber}: Which organelle is called powerhouse of cell?`,
-            options: ["Nucleus", "Mitochondria", "Ribosome", "Golgi"],
-            answer: "Mitochondria"
-        }
-    ];
-    answers = new Array(loadedQuestions.length).fill(null);
-    currIndex = 0;
-    renderQuestion(currIndex);
-    startTimer();
 }
 
 // ✅ Render each question
