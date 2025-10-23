@@ -1,6 +1,6 @@
 // ✅ Start date for week 1 unlock
 const START_DATE = new Date("2025-10-20T00:00:00");
-const TOTAL_WEEKS = 20;
+const TOTAL_WEEKS = 28;
 const QUESTIONS_PER_WEEK = 180;
 
 // 🧩 DOM elements
