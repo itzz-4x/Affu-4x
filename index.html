@@ -1,27 +1,65 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>NEET Practice Portal</title>
-  <link rel="icon" href="data:,"> <!-- optional favicon fix -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase SDK (use script option) -->
+ <!-- ✅ Firebase v8 compat version -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<!-- ✅ Firebase Config must be before app.js -->
+<script src="firebase-config.js"></script>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <h1>NEET Practice Portal</h1>
+      <div id="userBadge" class="hidden"></div>
+    </header>
 
-  <section id="enterSection">
-    <input id="studentNameInput" type="text" placeholder="Enter your name">
-    <button id="enterBtn">Start</button>
-  </section>
+    <main id="main">
+      <section id="enterSection">
+        <input id="studentName" placeholder="Enter your name" />
+        <button id="enterBtn">Enter</button>
+      </section>
 
-  <section id="weeksSection" class="hidden">
-    <div id="weeksContainer"></div>
-  </section>
+      <section id="weeksSection" class="hidden">
+        <h2>Weeks Schedule</h2>
+        <div id="weeksContainer" class="weeks-grid"></div>
+      </section>
 
-  <!-- ✅ Firebase and app scripts only once -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+      <section id="examSection" class="hidden">
+        <div id="examHeader">
+          <button id="backToWeeks">← Back</button>
+          <h2 id="examTitle">Week</h2>
+        </div>
+        
+        <!-- YAHAN TIMER ADD KIYA HAI -->
+        <div id="timer" style="text-align: center; font-size: 20px; font-weight: bold; margin: 15px 0; padding: 10px; background: #f0f8ff; border-radius: 8px; border: 2px solid #007bff;">
+          ⏰ Time Remaining: <span id="timeDisplay">180:00</span>
+        </div>
+        
+        <div id="questionArea"></div>
+        <div id="examControls">
+          <button id="prevQ">Previous</button>
+          <button id="skipQ">Skip</button>
+          <button id="nextQ">Next</button>
+          <button id="submitExam">Submit</button>
+        </div>
+      </section>
 
-  <script src="firebase-config.js"></script>
+      <section id="resultSection" class="hidden">
+        <h2>Result</h2>
+        <div id="resultContent"></div>
+        <button id="doneBtn">Done</button>
+      </section>
+    </main>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
