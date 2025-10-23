@@ -38,18 +38,11 @@ function initializeDOMElements() {
     resultContent = document.getElementById('resultContent');
     doneBtn = document.getElementById('doneBtn');
     timerDisplay = document.getElementById('timeDisplay');
-    
-    console.log("DOM Elements:", {
-        enterBtn: !!enterBtn,
-        studentName: !!studentNameInput,
-        enterSection: !!enterSection
-    });
 }
 
 function setupEventListeners() {
-    // ✅ Enter button - DIRECT EVENT LISTENER
+    // ✅ Enter button
     if (enterBtn && studentNameInput) {
-        console.log("Setting up enter button...");
         enterBtn.addEventListener('click', handleEnterClick);
         
         studentNameInput.addEventListener('keypress', function(e) {
@@ -57,8 +50,6 @@ function setupEventListeners() {
                 handleEnterClick();
             }
         });
-    } else {
-        console.error("Enter button or input not found!");
     }
 
     // Navigation buttons
@@ -120,16 +111,11 @@ function setupEventListeners() {
     }
 }
 
-// ✅ Enter button handler - SIMPLE VERSION
+// ✅ Enter button handler
 async function handleEnterClick() {
-    console.log("Enter button clicked!");
-    
     const name = studentNameInput.value.trim();
-    console.log("Name entered:", name);
-    
     if (!name) {
-        alert("Please enter your name to continue");
-        studentNameInput.focus();
+        alert("Please enter your name");
         return;
     }
 
@@ -140,7 +126,7 @@ async function handleEnterClick() {
         userBadge.classList.remove('hidden');
     }
 
-    // ✅ DIRECT FIREBASE SAVE (No authentication)
+    // Firebase save
     try {
         await firebase.firestore().collection('Students').add({
             Name: name,
@@ -152,7 +138,6 @@ async function handleEnterClick() {
         console.log("Firebase save skipped");
     }
 
-    // Show weeks section
     enterSection.classList.add('hidden');
     weeksSection.classList.remove('hidden');
     renderWeeks();
@@ -175,9 +160,6 @@ function renderWeeks() {
     if (!weeksContainer) return;
     
     weeksContainer.innerHTML = '';
-    const unlockedWeeks = weeksUnlockedCount();
-    console.log(`Rendering ${unlockedWeeks} unlocked weeks`);
-    
     for (let i = 1; i <= TOTAL_WEEKS; i++) {
         const card = document.createElement('div');
         card.className = 'week-card ' + (isWeekUnlocked(i) ? 'unlocked' : 'locked');
@@ -186,10 +168,7 @@ function renderWeeks() {
         btn.className = 'start-exam';
         btn.textContent = isWeekUnlocked(i) ? 'Start Exam' : 'Locked';
         if (isWeekUnlocked(i)) {
-            btn.addEventListener('click', function() {
-                console.log(`Week ${i} clicked`);
-                loadWeek(i);
-            });
+            btn.addEventListener('click', () => loadWeek(i));
         } else {
             btn.disabled = true;
         }
@@ -231,9 +210,9 @@ function updateTimerDisplay() {
     }
 }
 
-// ✅ Load questions dynamically
+// ✅ Load questions dynamically - FIXED TO LOAD EXTERNAL FILES
 function loadWeek(weekNumber) {
-    console.log(`Loading week ${weekNumber}`);
+    console.log(`Loading week ${weekNumber} from external file...`);
     
     loadedQuestions = [];
     answers = [];
@@ -243,7 +222,44 @@ function loadWeek(weekNumber) {
     weeksSection.classList.add('hidden');
     examSection.classList.remove('hidden');
 
-    // ✅ TEMPORARY QUESTIONS FOR ALL WEEKS
+    const scriptId = 'weekScript';
+    const old = document.getElementById(scriptId);
+    if (old) old.remove();
+
+    const s = document.createElement('script');
+    s.id = scriptId;
+    s.src = `questions/week${weekNumber}.js`;
+    
+    s.onload = function() {
+        console.log(`Week ${weekNumber} questions loaded successfully`);
+        const varName = `week${weekNumber}Questions`;
+        
+        if (window[varName] && Array.isArray(window[varName]) && window[varName].length > 0) {
+            loadedQuestions = window[varName];
+            answers = new Array(loadedQuestions.length).fill(null);
+            currIndex = 0;
+            renderQuestion(currIndex);
+            startTimer();
+            console.log(`✅ Loaded ${loadedQuestions.length} questions from week${weekNumber}.js`);
+        } else {
+            console.error(`Questions not found in ${varName}`);
+            // Fallback to temporary questions
+            loadTemporaryQuestions(weekNumber);
+        }
+    };
+    
+    s.onerror = function() {
+        console.error(`Failed to load questions/week${weekNumber}.js`);
+        // Fallback to temporary questions if file not found
+        loadTemporaryQuestions(weekNumber);
+    };
+    
+    document.head.appendChild(s);
+}
+
+// ✅ Fallback temporary questions
+function loadTemporaryQuestions(weekNumber) {
+    console.log(`Using temporary questions for week ${weekNumber}`);
     loadedQuestions = [
         {
             question: `Week ${weekNumber}: What is the basic unit of life?`,
@@ -254,14 +270,8 @@ function loadWeek(weekNumber) {
             question: `Week ${weekNumber}: Which organelle is called powerhouse of cell?`,
             options: ["Nucleus", "Mitochondria", "Ribosome", "Golgi"],
             answer: "Mitochondria"
-        },
-        {
-            question: `Week ${weekNumber}: Photosynthesis occurs in?`,
-            options: ["Mitochondria", "Chloroplast", "Nucleus", "Ribosome"],
-            answer: "Chloroplast"
         }
     ];
-    
     answers = new Array(loadedQuestions.length).fill(null);
     currIndex = 0;
     renderQuestion(currIndex);
@@ -341,7 +351,7 @@ async function submitExam() {
         </div>
     `;
 
-    // ✅ SAVE TO FIREBASE
+    // Save to Firebase
     try {
         await firebase.firestore().collection('Results').add({
             Name: name,
