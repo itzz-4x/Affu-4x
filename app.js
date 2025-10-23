@@ -38,12 +38,21 @@ async function signInAnon() {
 }
 
 // ✅ Enter button
-enterBtn.addEventListener('click', async () => {
-  const name = studentNameInput.value.trim();
-  if (!name) {
-    alert("Enter your name");
-    return;
-  }
+const enterBtn = document.getElementById('enterBtn');
+const studentNameInput = document.getElementById('studentNameInput');
+
+if (enterBtn && studentNameInput) {
+  enterBtn.addEventListener('click', async () => {
+    const name = studentNameInput.value.trim();
+    if (!name) {
+      alert("Enter your name");
+      return;
+    }
+    // baki code same rakho
+  });
+} else {
+  console.error("enterBtn or studentNameInput not found in HTML!");
+}
 
   sessionStorage.setItem('studentName', name);
   userBadge.textContent = `Hello, ${name}`;
