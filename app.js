@@ -4,261 +4,327 @@ const TOTAL_WEEKS = 20;
 const QUESTIONS_PER_WEEK = 180;
 
 // 🧩 DOM elements
-const enterBtn = document.getElementById('enterBtn');
-const studentNameInput = document.getElementById('studentName');
-const enterSection = document.getElementById('enterSection');
-const weeksSection = document.getElementById('weeksSection');
-const weeksContainer = document.getElementById('weeksContainer');
-const userBadge = document.getElementById('userBadge');
-const examSection = document.getElementById('examSection');
-const examTitle = document.getElementById('examTitle');
-const questionArea = document.getElementById('questionArea');
-const backToWeeks = document.getElementById('backToWeeks');
-const resultSection = document.getElementById('resultSection');
-const resultContent = document.getElementById('resultContent');
-const doneBtn = document.getElementById('doneBtn');
-const timerDisplay = document.getElementById('timer');
+let enterBtn, studentNameInput, enterSection, weeksSection, weeksContainer;
+let userBadge, examSection, examTitle, questionArea, backToWeeks;
+let resultSection, resultContent, doneBtn, timerDisplay;
 
+// Variables
 let currentUser = null;
 let loadedQuestions = [];
 let currIndex = 0;
 let answers = [];
 let timerInterval;
-let totalSeconds = 180 * 60; // 3 hours timer
+let totalSeconds = 180 * 60;
+
+// ✅ Initialize everything after page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDOMElements();
+    setupEventListeners();
+});
+
+function initializeDOMElements() {
+    enterBtn = document.getElementById('enterBtn');
+    studentNameInput = document.getElementById('studentName');
+    enterSection = document.getElementById('enterSection');
+    weeksSection = document.getElementById('weeksSection');
+    weeksContainer = document.getElementById('weeksContainer');
+    userBadge = document.getElementById('userBadge');
+    examSection = document.getElementById('examSection');
+    examTitle = document.getElementById('examTitle');
+    questionArea = document.getElementById('questionArea');
+    backToWeeks = document.getElementById('backToWeeks');
+    resultSection = document.getElementById('resultSection');
+    resultContent = document.getElementById('resultContent');
+    doneBtn = document.getElementById('doneBtn');
+    timerDisplay = document.getElementById('timeDisplay');
+}
+
+function setupEventListeners() {
+    // ✅ Enter button FIXED
+    if (enterBtn && studentNameInput) {
+        enterBtn.addEventListener('click', handleEnterClick);
+        
+        // Enter key support
+        studentNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleEnterClick();
+            }
+        });
+    }
+
+    // Navigation buttons
+    if (backToWeeks) {
+        backToWeeks.addEventListener('click', function() {
+            examSection.classList.add('hidden');
+            weeksSection.classList.remove('hidden');
+            clearInterval(timerInterval);
+        });
+    }
+
+    if (doneBtn) {
+        doneBtn.addEventListener('click', function() {
+            resultSection.classList.add('hidden');
+            weeksSection.classList.remove('hidden');
+        });
+    }
+
+    // Exam controls
+    const prevQ = document.getElementById('prevQ');
+    const nextQ = document.getElementById('nextQ');
+    const skipQ = document.getElementById('skipQ');
+    const submitExam = document.getElementById('submitExam');
+
+    if (prevQ) prevQ.addEventListener('click', () => {
+        if (currIndex > 0) { currIndex--; renderQuestion(currIndex); }
+    });
+    
+    if (nextQ) nextQ.addEventListener('click', () => {
+        if (currIndex < loadedQuestions.length - 1) { currIndex++; renderQuestion(currIndex); }
+    });
+    
+    if (skipQ) skipQ.addEventListener('click', () => {
+        answers[currIndex] = null;
+        if (currIndex < loadedQuestions.length - 1) { currIndex++; renderQuestion(currIndex); }
+    });
+    
+    if (submitExam) submitExam.addEventListener('click', submitExam);
+}
+
+// ✅ Enter button handler - FIXED
+async function handleEnterClick() {
+    const name = studentNameInput.value.trim();
+    if (!name) {
+        alert("Please enter your name");
+        return;
+    }
+
+    // Save name and update UI
+    sessionStorage.setItem('studentName', name);
+    if (userBadge) {
+        userBadge.textContent = `Hello, ${name}`;
+        userBadge.classList.remove('hidden');
+    }
+
+    // Firebase anonymous login
+    currentUser = await signInAnon();
+    if (currentUser) {
+        await db.collection('Students').doc(currentUser.uid).set({
+            Name: name,
+            LastSeen: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    }
+
+    enterSection.classList.add('hidden');
+    renderWeeks();
+    weeksSection.classList.remove('hidden');
+}
 
 // ✅ Firebase anonymous login
 async function signInAnon() {
-  try {
-    const res = await auth.signInAnonymously();
-    return res.user;
-  } catch (e) {
-    console.warn("Anonymous sign-in failed:", e);
-    return null;
-  }
-}
-
-// ✅ Enter button
-const enterBtn = document.getElementById('enterBtn');
-const studentNameInput = document.getElementById('studentNameInput');
-
-if (enterBtn && studentNameInput) {
-  enterBtn.addEventListener('click', async () => {
-    const name = studentNameInput.value.trim();
-    if (!name) {
-      alert("Enter your name");
-      return;
+    try {
+        const res = await auth.signInAnonymously();
+        return res.user;
+    } catch (e) {
+        console.warn("Anonymous sign-in failed:", e);
+        return null;
     }
-    // baki code same rakho
-  });
-} else {
-  console.error("enterBtn or studentNameInput not found in HTML!");
 }
-
-  sessionStorage.setItem('studentName', name);
-  userBadge.textContent = `Hello, ${name}`;
-  userBadge.classList.remove('hidden');
-
-  currentUser = await signInAnon();
-  if (currentUser) {
-    await db.collection('Students').doc(currentUser.uid).set({
-      Name: name,
-      LastSeen: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-  }
-
-  enterSection.classList.add('hidden');
-  renderWeeks();
-  weeksSection.classList.remove('hidden');
-});
 
 // ✅ Week unlock logic
 function weeksUnlockedCount() {
-  const now = new Date();
-  const diff = now - START_DATE;
-  if (diff < 0) return 0;
-  const weeks = Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
-  return Math.max(0, Math.min(weeks, TOTAL_WEEKS));
+    const now = new Date();
+    const diff = now - START_DATE;
+    if (diff < 0) return 0;
+    const weeks = Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
+    return Math.max(0, Math.min(weeks, TOTAL_WEEKS));
 }
 
 function isWeekUnlocked(weekNumber) {
-  return weekNumber <= weeksUnlockedCount();
+    return weekNumber <= weeksUnlockedCount();
 }
 
 function renderWeeks() {
-  weeksContainer.innerHTML = '';
-  for (let i = 1; i <= TOTAL_WEEKS; i++) {
-    const card = document.createElement('div');
-    card.className = 'week-card ' + (isWeekUnlocked(i) ? 'unlocked' : 'locked');
-    card.innerHTML = `<h3>Week ${i}</h3><p>Weekly Practice Test</p>`;
-    const btn = document.createElement('button');
-    btn.textContent = isWeekUnlocked(i) ? 'Start Exam' : 'Locked';
-    if (isWeekUnlocked(i)) {
-      btn.addEventListener('click', () => loadWeek(i));
-    } else {
-      btn.disabled = true;
+    if (!weeksContainer) return;
+    
+    weeksContainer.innerHTML = '';
+    for (let i = 1; i <= TOTAL_WEEKS; i++) {
+        const card = document.createElement('div');
+        card.className = 'week-card ' + (isWeekUnlocked(i) ? 'unlocked' : 'locked');
+        card.innerHTML = `<h3>Week ${i}</h3><p>Weekly Practice Test</p>`;
+        const btn = document.createElement('button');
+        btn.className = 'start-exam';
+        btn.textContent = isWeekUnlocked(i) ? 'Start Exam' : 'Locked';
+        if (isWeekUnlocked(i)) {
+            btn.addEventListener('click', () => loadWeek(i));
+        } else {
+            btn.disabled = true;
+        }
+        card.appendChild(btn);
+        weeksContainer.appendChild(card);
     }
-    card.appendChild(btn);
-    weeksContainer.appendChild(card);
-  }
 }
 
 // ✅ Timer
 function startTimer() {
-  clearInterval(timerInterval);
-  totalSeconds = 180 * 60;
-  timerInterval = setInterval(() => {
+    clearInterval(timerInterval);
+    totalSeconds = 180 * 60;
+    updateTimerDisplay();
+    
+    timerInterval = setInterval(() => {
+        totalSeconds--;
+        updateTimerDisplay();
+        
+        if (totalSeconds <= 0) {
+            clearInterval(timerInterval);
+            alert("⏰ Time's up! Submitting automatically...");
+            submitExam();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    if (!timerDisplay) return;
+    
     const hrs = Math.floor(totalSeconds / 3600);
     const mins = Math.floor((totalSeconds % 3600) / 60);
     const secs = totalSeconds % 60;
     timerDisplay.textContent = `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    if (totalSeconds <= 0) {
-      clearInterval(timerInterval);
-      alert("⏰ Time’s up! Submitting automatically...");
-      submitExam();
+    
+    // Color warnings
+    if (totalSeconds < 300) {
+        timerDisplay.style.color = '#ff6b6b';
+    } else if (totalSeconds < 600) {
+        timerDisplay.style.color = '#ffd93d';
     }
-    totalSeconds--;
-  }, 1000);
 }
 
 // ✅ Load questions dynamically
 function loadWeek(weekNumber) {
-  loadedQuestions = [];
-  answers = [];
-  currIndex = 0;
+    loadedQuestions = [];
+    answers = [];
+    currIndex = 0;
 
-  examTitle.textContent = `Week ${weekNumber} - Exam`;
-  weeksSection.classList.add('hidden');
-  examSection.classList.remove('hidden');
+    examTitle.textContent = `Week ${weekNumber} - Exam`;
+    weeksSection.classList.add('hidden');
+    examSection.classList.remove('hidden');
 
-  const scriptId = 'weekScript';
-  const old = document.getElementById(scriptId);
-  if (old) old.remove();
+    const scriptId = 'weekScript';
+    const old = document.getElementById(scriptId);
+    if (old) old.remove();
 
-  const s = document.createElement('script');
-  s.id = scriptId;
-  s.src = `questions/week${weekNumber}.js`;
-  s.onload = () => {
-    const varName = `week${weekNumber}Questions`;
-    if (window[varName] && Array.isArray(window[varName]) && window[varName].length >= 1) {
-      loadedQuestions = window[varName].slice();
-      answers = new Array(loadedQuestions.length).fill(null);
-      currIndex = 0;
-      renderQuestion(currIndex);
-      startTimer();
-    } else {
-      questionArea.innerHTML = `<p style="color:#f88">Questions file not found or invalid.</p>`;
-    }
-  };
-  s.onerror = () => {
-    questionArea.innerHTML = `<p style="color:#f88">Failed to load questions/week${weekNumber}.js</p>`;
-  };
-  document.body.appendChild(s);
+    const s = document.createElement('script');
+    s.id = scriptId;
+    s.src = `questions/week${weekNumber}.js`;
+    s.onload = () => {
+        const varName = `week${weekNumber}Questions`;
+        if (window[varName] && Array.isArray(window[varName]) && window[varName].length >= 1) {
+            loadedQuestions = window[varName].slice();
+            answers = new Array(loadedQuestions.length).fill(null);
+            currIndex = 0;
+            renderQuestion(currIndex);
+            startTimer();
+        } else {
+            questionArea.innerHTML = `<p style="color:#f88">Questions file not found or invalid.</p>`;
+        }
+    };
+    s.onerror = () => {
+        questionArea.innerHTML = `<p style="color:#f88">Failed to load questions/week${weekNumber}.js</p>`;
+    };
+    document.body.appendChild(s);
 }
 
 // ✅ Render each question
 function renderQuestion(index) {
-  if (!loadedQuestions || loadedQuestions.length === 0) {
-    questionArea.innerHTML = `<p>No questions loaded.</p>`;
-    return;
-  }
-  const q = loadedQuestions[index];
-  questionArea.innerHTML = `
-    <div class="q-card">
-      <div><strong>Q ${index + 1}.</strong> ${escapeHtml(q.question)}</div>
-      <div class="options">
-        ${q.options.map((opt, i) => `<div class="opt ${answers[index] === i ? 'selected' : ''}" data-idx="${i}">${String.fromCharCode(65 + i)}. ${escapeHtml(opt)}</div>`).join('')}
-      </div>
-    </div>
-    <div style="text-align:center"><small>Question ${index + 1} of ${loadedQuestions.length}</small></div>
-  `;
-  document.querySelectorAll('.opt').forEach(el => {
-    el.addEventListener('click', () => {
-      const idx = parseInt(el.getAttribute('data-idx'));
-      answers[index] = idx;
-      renderQuestion(index);
-    });
-  });
-}
-
-// ✅ Controls
-document.getElementById('prevQ').addEventListener('click', () => {
-  if (currIndex > 0) { currIndex--; renderQuestion(currIndex); }
-});
-document.getElementById('nextQ').addEventListener('click', () => {
-  if (currIndex < loadedQuestions.length - 1) { currIndex++; renderQuestion(currIndex); }
-});
-document.getElementById('skipQ').addEventListener('click', () => {
-  answers[currIndex] = null;
-  if (currIndex < loadedQuestions.length - 1) { currIndex++; renderQuestion(currIndex); }
-});
-backToWeeks.addEventListener('click', () => {
-  examSection.classList.add('hidden');
-  weeksSection.classList.remove('hidden');
-  clearInterval(timerInterval);
-});
-
-// ✅ Submit
-document.getElementById('submitExam').addEventListener('click', submitExam);
-
-async function submitExam() {
-  clearInterval(timerInterval);
-  if (!confirm("Submit your answers?")) return;
-
-  let correct = 0, wrong = 0, skipped = 0;
-  loadedQuestions.forEach((q, i) => {
-    const chosenIndex = answers[i];
-    if (chosenIndex === null || chosenIndex === undefined) { skipped++; return; }
-    const chosenText = q.options[chosenIndex];
-    if (chosenText === q.answer) correct++;
-    else wrong++;
-  });
-
-  const attempted = correct + wrong;
-  const marks = correct * 4 + wrong * (-1);
-  const percentage = +(marks / 720 * 100).toFixed(2);
-  const name = sessionStorage.getItem('studentName') || 'Unknown';
-
-  examSection.classList.add('hidden');
-  resultSection.classList.remove('hidden');
-  resultContent.innerHTML = `
-    <p>Name: ${escapeHtml(name)}</p>
-    <p>Correct: ${correct}</p>
-    <p>Wrong: ${wrong}</p>
-    <p>Skipped: ${skipped}</p>
-    <p>Attempted: ${attempted}</p>
-    <p>Marks: ${marks}</p>
-    <p>Percentage: ${percentage}%</p>
-  `;
-
-  try {
-    if (currentUser) {
-      await db.collection('Students').doc(currentUser.uid).collection('Results').add({
-        Name: name,
-        Week: parseInt(examTitle.textContent.replace(/[^0-9]/g, '')),
-        Correct: correct,
-        Wrong: wrong,
-        Skipped: skipped,
-        Attempted: attempted,
-        Marks: marks,
-        Percentage: percentage,
-        Timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      console.log("✅ Result saved successfully!");
-    } else {
-      console.error("⚠️ No user signed in");
+    if (!questionArea) return;
+    
+    if (!loadedQuestions || loadedQuestions.length === 0) {
+        questionArea.innerHTML = `<p>No questions loaded.</p>`;
+        return;
     }
-  } catch (err) {
-    console.error("❌ Firestore save error:", err);
-  }
+    
+    const q = loadedQuestions[index];
+    questionArea.innerHTML = `
+        <div class="q-card">
+            <div><strong>Q ${index + 1}.</strong> ${escapeHtml(q.question)}</div>
+            <div class="options">
+                ${q.options.map((opt, i) => `
+                    <div class="opt ${answers[index] === i ? 'selected' : ''}" data-idx="${i}">
+                        ${String.fromCharCode(65 + i)}. ${escapeHtml(opt)}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        <div style="text-align:center"><small>Question ${index + 1} of ${loadedQuestions.length}</small></div>
+    `;
+    
+    document.querySelectorAll('.opt').forEach(el => {
+        el.addEventListener('click', () => {
+            const idx = parseInt(el.getAttribute('data-idx'));
+            answers[index] = idx;
+            renderQuestion(index);
+        });
+    });
 }
 
-doneBtn.addEventListener('click', () => {
-  resultSection.classList.add('hidden');
-  weeksSection.classList.remove('hidden');
-});
+// ✅ Submit exam
+async function submitExam() {
+    clearInterval(timerInterval);
+    if (!confirm("Submit your answers?")) return;
+
+    let correct = 0, wrong = 0, skipped = 0;
+    loadedQuestions.forEach((q, i) => {
+        const chosenIndex = answers[i];
+        if (chosenIndex === null || chosenIndex === undefined) { 
+            skipped++; 
+            return; 
+        }
+        const chosenText = q.options[chosenIndex];
+        if (chosenText === q.answer) correct++;
+        else wrong++;
+    });
+
+    const attempted = correct + wrong;
+    const marks = correct * 4 + wrong * (-1);
+    const percentage = +(marks / 720 * 100).toFixed(2);
+    const name = sessionStorage.getItem('studentName') || 'Unknown';
+
+    examSection.classList.add('hidden');
+    resultSection.classList.remove('hidden');
+    resultContent.innerHTML = `
+        <div class="result-details">
+            <h3>🎉 Exam Completed!</h3>
+            <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+            <p><strong>Correct:</strong> ${correct}</p>
+            <p><strong>Wrong:</strong> ${wrong}</p>
+            <p><strong>Skipped:</strong> ${skipped}</p>
+            <p><strong>Attempted:</strong> ${attempted}</p>
+            <p><strong>Marks:</strong> ${marks}</p>
+            <p><strong>Percentage:</strong> ${percentage}%</p>
+        </div>
+    `;
+
+    try {
+        if (currentUser) {
+            await db.collection('Students').doc(currentUser.uid).collection('Results').add({
+                Name: name,
+                Week: parseInt(examTitle.textContent.replace(/[^0-9]/g, '')),
+                Correct: correct,
+                Wrong: wrong,
+                Skipped: skipped,
+                Attempted: attempted,
+                Marks: marks,
+                Percentage: percentage,
+                Timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log("✅ Result saved successfully!");
+        }
+    } catch (err) {
+        console.error("❌ Firestore save error:", err);
+    }
+}
 
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"'`]/g, c => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c]
-  ));
-      }
+    return String(s).replace(/[&<>"'`]/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c]
+    ));
+}
