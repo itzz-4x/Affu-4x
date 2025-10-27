@@ -1,13 +1,14 @@
 :root {
-  --bg1: linear-gradient(135deg, #ffd1dc 0%, #d8b4fe 50%, #a5f3fc 100%);
+  --bg1: linear-gradient(135deg, #ffe6eb 0%, #e9d5ff 45%, #b3ecff 100%);
   --accent1: #ff9ecd;
   --accent2: #d8b4fe;
   --text1: #3b0764;
-  --card: rgba(255, 255, 255, 0.25);
+  --card: rgba(255, 255, 255, 0.35);
   --glass: rgba(255, 255, 255, 0.3);
   --shadow: 0 8px 24px rgba(255, 182, 193, 0.25);
 }
 
+/* Reset + Base */
 * {
   box-sizing: border-box;
   transition: all 0.3s ease;
@@ -23,6 +24,13 @@ body {
   justify-content: center;
   align-items: flex-start;
   padding: 20px;
+  background-attachment: fixed;
+  animation: bgMove 20s ease-in-out infinite alternate;
+}
+
+@keyframes bgMove {
+  0% { background-position: left top; }
+  100% { background-position: right bottom; }
 }
 
 /* Container */
@@ -39,71 +47,228 @@ header {
   align-items: center;
   justify-content: space-between;
   background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 16px 24px;
-  box-shadow: var(--shadow);
-}
-h1 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text1);
+  backdrop-filter: blur(16px);
+  border-radius: 18px;
+  padding: 18px 26px;
+  box-shadow: 0 8px 30px rgba(255, 192, 203, 0.25);
+  border: 1px solid rgba(255,255,255,0.4);
+  animation: fadeIn 1.2s ease forwards;
 }
 
-/* Inputs & Buttons */
+h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text1);
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.4);
+}
+
+/* Inputs */
 input {
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   width: 240px;
   background: rgba(255, 255, 255, 0.7);
   color: #3b0764;
   font-weight: 500;
   outline: none;
+  box-shadow: inset 0 0 5px rgba(255,255,255,0.4);
 }
 input::placeholder {
   color: #6b21a8;
   opacity: 0.8;
 }
+
+/* Buttons */
 button {
-  padding: 10px 18px;
-  border-radius: 12px;
+  padding: 10px 20px;
+  border-radius: 14px;
   border: none;
   background: linear-gradient(90deg, var(--accent1), var(--accent2));
   color: #fff;
   cursor: pointer;
   font-weight: 600;
-  box-shadow: 0 4px 10px rgba(216, 180, 254, 0.3);
+  box-shadow: 0 6px 16px rgba(216, 180, 254, 0.3);
+  letter-spacing: 0.3px;
+  position: relative;
+  overflow: hidden;
 }
+
+button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.2);
+  transition: all 0.4s ease;
+}
+
+button:hover::after {
+  left: 100%;
+}
+
 button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 14px rgba(255, 182, 193, 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px rgba(255, 182, 193, 0.6);
 }
+
 .hidden {
   display: none;
 }
 
-/* Weeks grid */
+/* Week Cards */
 .weeks-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 14px;
-  margin-top: 18px;
+  gap: 16px;
+  margin-top: 20px;
 }
+
 .week-card {
   background: var(--card);
   backdrop-filter: blur(12px);
-  padding: 18px;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.week-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 30px rgba(255, 192, 203, 0.35);
+}
+
+.week-card.locked {
+  opacity: 0.6;
+  filter: grayscale(0.4);
+  cursor: not-allowed;
+}
+
+.week-card h3 {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  color: var(--text1);
+}
+
+.week-card p {
+  margin: 0 0 14px 0;
+  font-size: 14px;
+}
+
+.week-card button {
+  background: linear-gradient(90deg, #ffafd3, #d8b4fe);
+  color: #fff;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  border: none;
+  transition: all 0.25s ease;
+}
+
+.week-card button:hover {
+  background: linear-gradient(90deg, #ff9ecd, #c084fc);
+  box-shadow: 0 4px 12px rgba(255, 150, 200, 0.4);
+}
+
+/* Exam Area */
+#questionArea {
+  margin: 18px 0;
+  padding: 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+  animation: fadeIn 1s ease;
+}
+
+.q-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.4);
+  margin-bottom: 12px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.opt {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.opt:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.opt.selected {
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  transform: scale(1.02);
+}
+
+#examControls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* Result */
+#resultContent {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(14px);
+  padding: 20px;
   border-radius: 16px;
   box-shadow: var(--shadow);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  text-align: center;
+  animation: fadeIn 1.2s ease;
 }
-.week-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(255, 182, 193, 0.3);
+
+#resultContent h2 {
+  color: var(--text1);
+  font-weight: 700;
 }
-.week-card.locked {
+
+footer {
+  text-align: center;
+  padding: 20px 0;
+  color: #4a044e;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  input {
+    width: 160px;
+  }
+  h1 {
+    font-size: 18px;
+  }
+  button {
+    padding: 8px 14px;
+  }
+  }.week-card.locked {
   opacity: 0.5;
   filter: grayscale(0.2);
   cursor: not-allowed;
