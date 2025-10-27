@@ -1,163 +1,41 @@
-/* 🌸 Princess 4X Romantic Style 🌸 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+:root{
+  --bg1:#0f172a; --accent1:#06b6d4; --card:#0b1220;
+  --glass: rgba(255,255,255,0.04);
 }
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:Inter,system-ui,Arial,sans-serif;
+  background: linear-gradient(135deg,#071029 0%, #09203f 60%);
+  color:#e6eef6; min-height:100vh;
+}
+.wrap{max-width:920px;margin:24px auto;padding:18px;}
+header{display:flex;align-items:center;justify-content:space-between}
+h1{margin:0;font-size:20px}
+input{padding:12px;border-radius:10px;border:0;width:220px;background:#fff; color:#022}
+button{padding:10px 14px;border-radius:10px;border:0;background:var(--accent1);color:#fff;cursor:pointer;font-weight:600}
+.hidden{display:none}
 
-body {
-  background: radial-gradient(circle at top left, #ffe6f9, #ffd6f6, #ffbde6);
-  color: #3a003a;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fadeIn 1s ease-in-out;
-}
+/* Weeks grid */
+.weeks-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px}
+.week-card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+.week-card.locked{opacity:.5;filter:grayscale(.2);cursor:not-allowed}
+.week-card.unlocked{border:1px solid rgba(255,255,255,0.06)}
+.week-card h3{margin:0 0 8px 0}
+.week-card p{margin:0 0 12px 0}
+.week-card button{background:var(--accent1);color:#fff;padding:8px 12px;border-radius:8px}
 
-.page {
-  width: 100%;
-  max-width: 480px;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  box-shadow: 0 0 30px rgba(255, 105, 180, 0.3);
-  padding: 20px;
-  overflow: hidden;
-}
+/* Exam area */
+#questionArea{margin:16px 0;padding:18px;border-radius:12px;background:linear-gradient(180deg,#041224, #072137)}
+.q-card{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);margin-bottom:12px}
+.options{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.opt{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+.opt.selected{background:rgba(6,182,212,0.12);border-color:rgba(6,182,212,0.4)}
+#examControls{display:flex;gap:10px;justify-content:center;margin-top:10px}
 
-header.hero {
-  text-align: center;
-  margin-bottom: 20px;
-}
+/* Result */
+#resultContent{background:linear-gradient(180deg,#061428,#0b2a3f);padding:16px;border-radius:10px}
+#timer{text-align:center;margin:8px auto 18px;font-weight:bold;color:#06b6d4}
 
-header.hero h1 {
-  font-size: 1.8em;
-  background: linear-gradient(90deg, #ff66b2, #ff85c2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: glowText 2s infinite alternate;
-}
-
-.logo {
-  font-size: 2rem;
-  animation: float 3s ease-in-out infinite;
-}
-
-.card {
-  text-align: center;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 0 15px rgba(255, 105, 180, 0.2);
-  transition: all 0.3s ease;
-}
-
-.card h2 {
-  color: #d63384;
-  margin-bottom: 10px;
-}
-
-p {
-  color: #6a006a;
-  margin-bottom: 15px;
-}
-
-input {
-  width: 80%;
-  padding: 10px;
-  border: 2px solid #ff80bf;
-  border-radius: 10px;
-  outline: none;
-  text-align: center;
-  font-size: 1em;
-  margin-bottom: 15px;
-  transition: 0.3s;
-}
-input:focus {
-  border-color: #ff4da6;
-  box-shadow: 0 0 10px #ff80c0;
-}
-
-button {
-  background: linear-gradient(90deg, #ff66b2, #ff85c2);
-  border: none;
-  color: white;
-  font-weight: bold;
-  padding: 10px 20px;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: 0.3s;
-  box-shadow: 0 4px 10px rgba(255, 105, 180, 0.4);
-}
-button:hover {
-  background: linear-gradient(90deg, #ff99cc, #ff66b2);
-  transform: scale(1.05);
-}
-
-.row {
-  margin-top: 10px;
-}
-
-.exam-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255, 240, 250, 0.8);
-  border-radius: 12px;
-  padding: 8px 15px;
-  font-weight: 600;
-  color: #b30059;
-}
-
-#question {
-  margin: 15px 0;
-  font-weight: 600;
-}
-
-.opts button {
-  display: block;
-  width: 100%;
-  margin: 8px 0;
-  border-radius: 10px;
-}
-
-.nav {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 10px;
-}
-
-.resText {
-  font-size: 1.2em;
-  color: #d63384;
-  margin-bottom: 10px;
-}
-
-footer.foot {
-  margin-top: 20px;
-  text-align: center;
-  color: #880044;
-  font-size: 0.9em;
-}
-
-/* 🌟 Animations */
-@keyframes glowText {
-  from {
-    text-shadow: 0 0 10px #ff99cc, 0 0 20px #ff66b2;
-  }
-  to {
-    text-shadow: 0 0 20px #ff4da6, 0 0 30px #ff3385;
-  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@media(max-width:600px){
+  input{width:140px}
 }
