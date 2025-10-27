@@ -1,6 +1,6 @@
 // ✅ Start date for week 1 unlock
 const START_DATE = new Date("2025-10-20T00:00:00");
-const TOTAL_WEEKS = 28;
+const TOTAL_WEEKS = 28; // ✅ 20 se 28 kardia
 const QUESTIONS_PER_WEEK = 180;
 
 // 🧩 DOM elements
@@ -16,20 +16,11 @@ let answers = [];
 let timerInterval;
 let totalSeconds = 180 * 60;
 
-// ✅ Initialize after page load
-document.addEventListener('DOMContentLoaded', function () {
+// ✅ Initialize everything after page load
+document.addEventListener('DOMContentLoaded', function() {
     console.log("🚀 NEET Portal Started");
     initializeDOMElements();
     setupEventListeners();
-
-    // 👇 If user already entered name earlier, auto show weeks
-    const savedName = sessionStorage.getItem('studentName');
-    if (savedName) {
-        if (userBadge) userBadge.textContent = `Hello, ${savedName}`;
-        enterSection.classList.add('hidden');
-        weeksSection.classList.remove('hidden');
-        renderWeeks();
-    }
 });
 
 function initializeDOMElements() {
@@ -50,15 +41,20 @@ function initializeDOMElements() {
 }
 
 function setupEventListeners() {
+    // ✅ Enter button
     if (enterBtn && studentNameInput) {
         enterBtn.addEventListener('click', handleEnterClick);
-        studentNameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleEnterClick();
+        
+        studentNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleEnterClick();
+            }
         });
     }
 
+    // Navigation buttons
     if (backToWeeks) {
-        backToWeeks.addEventListener('click', () => {
+        backToWeeks.addEventListener('click', function() {
             examSection.classList.add('hidden');
             weeksSection.classList.remove('hidden');
             clearInterval(timerInterval);
@@ -66,241 +62,48 @@ function setupEventListeners() {
     }
 
     if (doneBtn) {
-        doneBtn.addEventListener('click', () => {
+        doneBtn.addEventListener('click', function() {
             resultSection.classList.add('hidden');
             weeksSection.classList.remove('hidden');
         });
     }
 
+    // Exam controls
     const prevQ = document.getElementById('prevQ');
     const nextQ = document.getElementById('nextQ');
     const skipQ = document.getElementById('skipQ');
     const submitExamBtn = document.getElementById('submitExam');
 
-    if (prevQ) prevQ.addEventListener('click', () => { if (currIndex > 0) { currIndex--; renderQuestion(currIndex); } });
-    if (nextQ) nextQ.addEventListener('click', () => { if (currIndex < loadedQuestions.length - 1) { currIndex++; renderQuestion(currIndex); } });
-    if (skipQ) skipQ.addEventListener('click', () => { answers[currIndex] = null; if (currIndex < loadedQuestions.length - 1) { currIndex++; renderQuestion(currIndex); } });
-
-    if (submitExamBtn) submitExamBtn.addEventListener('click', submitExam);
-}
-
-// ✅ Enter button handler
-async function handleEnterClick() {
-    const name = studentNameInput.value.trim();
-    if (!name) {
-        alert("Please enter your name");
-        return;
-    }
-
-    sessionStorage.setItem('studentName', name);
-    if (userBadge) userBadge.textContent = `Hello, ${name}`;
-    userBadge.classList.remove('hidden');
-
-    try {
-        await firebase.firestore().collection('Students').add({
-            Name: name,
-            Timestamp: new Date().toISOString(),
-            EntryType: 'Direct'
+    if (prevQ) {
+        prevQ.addEventListener('click', () => {
+            if (currIndex > 0) { 
+                currIndex--; 
+                renderQuestion(currIndex); 
+            }
         });
-        console.log("✅ Student data saved to Firebase");
-    } catch (error) {
-        console.log("⚠️ Firebase save skipped:", error.message);
     }
-
-    enterSection.classList.add('hidden');
-    weeksSection.classList.remove('hidden');
-    renderWeeks();
-}
-
-// ✅ Week unlock logic
-function weeksUnlockedCount() {
-    const now = new Date();
-    const diff = now - START_DATE;
-    if (diff < 0) return 0;
-    const weeks = Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
-    return Math.max(0, Math.min(weeks, TOTAL_WEEKS));
-}
-
-function isWeekUnlocked(weekNumber) {
-    return weekNumber <= weeksUnlockedCount();
-}
-
-function renderWeeks() {
-    if (!weeksContainer) return;
-    weeksContainer.innerHTML = '';
-
-    for (let i = 1; i <= TOTAL_WEEKS; i++) {
-        const card = document.createElement('div');
-        card.className = 'week-card ' + (isWeekUnlocked(i) ? 'unlocked' : 'locked');
-        card.innerHTML = `<h3>Week ${i}</h3><p>Weekly Practice Test</p>`;
-        const btn = document.createElement('button');
-        btn.className = 'start-exam';
-        btn.textContent = isWeekUnlocked(i) ? 'Start Exam' : 'Locked';
-
-        if (isWeekUnlocked(i)) btn.addEventListener('click', () => loadWeek(i));
-        else btn.disabled = true;
-
-        card.appendChild(btn);
-        weeksContainer.appendChild(card);
-    }
-}
-
-// ✅ Timer fix
-function startTimer() {
-    clearInterval(timerInterval);
-    totalSeconds = 180 * 60;
-    updateTimerDisplay();
-
-    timerInterval = setInterval(() => {
-        totalSeconds--;
-        updateTimerDisplay();
-
-        if (totalSeconds <= 0) {
-            clearInterval(timerInterval);
-            alert("⏰ Time's up! Submitting automatically...");
-            submitExam();
-        }
-    }, 1000);
-}
-
-function updateTimerDisplay() {
-    if (!timerDisplay) return;
-
-    const hrs = Math.floor(totalSeconds / 3600);
-    const mins = Math.floor((totalSeconds % 3600) / 60);
-    const secs = totalSeconds % 60;
-    timerDisplay.textContent = `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-}
-
-// ✅ Load questions dynamically
-function loadWeek(weekNumber) {
-    console.log(`Loading week ${weekNumber}...`);
-    loadedQuestions = [];
-    answers = [];
-    currIndex = 0;
-
-    examTitle.textContent = `Week ${weekNumber} - Exam`;
-    weeksSection.classList.add('hidden');
-    examSection.classList.remove('hidden');
-
-    const scriptId = 'weekScript';
-    const old = document.getElementById(scriptId);
-    if (old) old.remove();
-
-    const s = document.createElement('script');
-    s.id = scriptId;
-    s.src = `questions/week${weekNumber}.js`;
-
-    s.onload = function () {
-        const varName = `week${weekNumber}Questions`;
-        if (window[varName] && Array.isArray(window[varName]) && window[varName].length > 0) {
-            loadedQuestions = window[varName];
-            answers = new Array(loadedQuestions.length).fill(null);
-            currIndex = 0;
-            renderQuestion(currIndex);
-            startTimer(); // ✅ Timer starts here now properly
-            console.log(`✅ Loaded ${loadedQuestions.length} questions`);
-        } else {
-            questionArea.innerHTML = `<div style="padding:50px;text-align:center"><h3>⚠️ Questions Not Found</h3></div>`;
-        }
-    };
-
-    s.onerror = function () {
-        questionArea.innerHTML = `<div style="padding:50px;text-align:center"><h3>⚠️ File Missing</h3></div>`;
-    };
-
-    document.head.appendChild(s);
-}
-
-// ✅ Render Question
-function renderQuestion(index) {
-    if (!loadedQuestions.length) {
-        questionArea.innerHTML = `<p>No questions loaded.</p>`;
-        return;
-    }
-
-    const q = loadedQuestions[index];
-    questionArea.innerHTML = `
-        <div class="q-card">
-            <div><strong>Q ${index + 1}.</strong> ${escapeHtml(q.question)}</div>
-            <div class="options">
-                ${q.options.map((opt, i) => `
-                    <div class="opt ${answers[index] === i ? 'selected' : ''}" data-idx="${i}">
-                        ${String.fromCharCode(65 + i)}. ${escapeHtml(opt)}
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-        <div style="text-align:center"><small>Question ${index + 1} of ${loadedQuestions.length}</small></div>
-    `;
-
-    document.querySelectorAll('.opt').forEach(el => {
-        el.addEventListener('click', function () {
-            const idx = parseInt(this.getAttribute('data-idx'));
-            answers[index] = idx;
-            renderQuestion(index);
+    
+    if (nextQ) {
+        nextQ.addEventListener('click', () => {
+            if (currIndex < loadedQuestions.length - 1) { 
+                currIndex++; 
+                renderQuestion(currIndex); 
+            }
         });
-    });
-}
-
-// ✅ Submit Exam
-async function submitExam() {
-    clearInterval(timerInterval);
-    if (!confirm("Submit your answers?")) return;
-
-    let correct = 0, wrong = 0, skipped = 0;
-    loadedQuestions.forEach((q, i) => {
-        const chosen = answers[i];
-        if (chosen == null) skipped++;
-        else if (q.options[chosen] === q.answer) correct++;
-        else wrong++;
-    });
-
-    const attempted = correct + wrong;
-    const marks = correct * 4 - wrong;
-    const totalMarks = loadedQuestions.length * 4;
-    const percentage = ((marks / totalMarks) * 100).toFixed(2);
-    const name = sessionStorage.getItem('studentName') || 'Unknown';
-    const weekNumber = examTitle.textContent.match(/\d+/)[0];
-
-    examSection.classList.add('hidden');
-    resultSection.classList.remove('hidden');
-    resultContent.innerHTML = `
-        <div class="result-details">
-            <h3>🎉 Exam Completed!</h3>
-            <p><strong>Name:</strong> ${escapeHtml(name)}</p>
-            <p><strong>Correct:</strong> ${correct}</p>
-            <p><strong>Wrong:</strong> ${wrong}</p>
-            <p><strong>Skipped:</strong> ${skipped}</p>
-            <p><strong>Marks:</strong> ${marks}/${totalMarks}</p>
-            <p><strong>Percentage:</strong> ${percentage}%</p>
-            <p><strong>Week:</strong> ${weekNumber}</p>
-        </div>
-    `;
-
-    try {
-        await firebase.firestore().collection('Results').add({
-            Name: name,
-            Week: parseInt(weekNumber),
-            Correct: correct,
-            Wrong: wrong,
-            Skipped: skipped,
-            Marks: marks,
-            TotalMarks: totalMarks,
-            Percentage: percentage,
-            Timestamp: new Date().toISOString()
-        });
-        console.log("✅ Result saved to Firebase!");
-    } catch (err) {
-        console.log("⚠️ Firebase save skipped");
     }
-}
-
-function escapeHtml(s) {
-    return String(s).replace(/[&<>"'`]/g, c =>
-        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c])
-    );
-}    if (submitExamBtn) {
+    
+    if (skipQ) {
+        skipQ.addEventListener('click', () => {
+            answers[currIndex] = null;
+            if (currIndex < loadedQuestions.length - 1) { 
+                currIndex++; 
+                renderQuestion(currIndex); 
+            }
+        });
+    }
+    
+    // ✅ SUBMIT BUTTON
+    if (submitExamBtn) {
         submitExamBtn.addEventListener('click', function() {
             console.log("Submit button clicked!");
             submitExam();
@@ -560,4 +363,4 @@ function escapeHtml(s) {
     return String(s).replace(/[&<>"'`]/g, c => (
         { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c]
     ));
-}
+        }
