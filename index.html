@@ -11,16 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
 <body>
-  <!-- Background Design -->
-  <div class="background">
-    <div class="floating-shapes">
-      <div class="shape shape-1"></div>
-      <div class="shape shape-2"></div>
-      <div class="shape shape-3"></div>
-      <div class="shape shape-4"></div>
-    </div>
-  </div>
-
   <div class="wrap">
     <header>
       <h1>PRINCESS NEET Practice Portal</h1>
@@ -50,7 +40,6 @@
           <h2 id="examTitle">Week</h2>
         </div>
         
-        <!-- Timer without white box -->
         <div id="timer">
           ⏰ Time Remaining: <span id="timeDisplay">180:00</span>
         </div>
@@ -86,8 +75,9 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    console.log("Firebase connected successfully!");
+    console.log("✅ Firebase connected successfully!");
   </script>
+
   <script src="app.js"></script>
 </body>
 </html>
