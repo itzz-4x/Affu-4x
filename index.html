@@ -17,41 +17,48 @@
     <header class="hero">
       <div class="logo">💗</div>
       <h1>Princess 4X Practice Portal</h1>
+      <div id="userBadge" class="hidden"></div>
     </header>
 
     <main class="main">
       <!-- Start Section -->
-      <section class="card" id="start">
+      <section class="card" id="enterSection">
         <h2>Welcome Beautiful Soul ✨</h2>
         <p>Enter your name and begin your NEET practice with love 💫</p>
         <input id="studentName" placeholder="Your full name" />
         <div class="row">
-          <button id="startBtn">Start Test 💕</button>
+          <button id="enterBtn">Start Test 💕</button>
         </div>
       </section>
 
+      <!-- Weeks Section -->
+      <section class="card hidden" id="weeksSection">
+        <h2>Your Practice Weeks 📚</h2>
+        <div id="weeksContainer" class="weeks-grid"></div>
+      </section>
+
       <!-- Exam Section -->
-      <section class="card" id="exam" style="display:none">
+      <section class="card hidden" id="examSection">
         <div class="exam-top">
           <div id="timer">⏰ Time Remaining: <span id="timeDisplay">180:00</span></div>
-          <div id="qnum"></div>
+          <div id="examTitle"></div>
         </div>
-        <div id="question" class="question"></div>
-        <div id="opts" class="opts"></div>
+        <div id="questionArea" class="question"></div>
         <div class="nav">
           <button id="prevQ">Previous</button>
           <button id="skipQ">Skip</button>
           <button id="nextQ">Next</button>
           <button id="submitExam">Submit</button>
         </div>
+        <button id="backToWeeks" class="back-btn">⬅ Back</button>
       </section>
 
       <!-- Result Section -->
-      <section class="card" id="result" style="display:none">
+      <section class="card hidden" id="resultSection">
         <h2>Well Done 💐</h2>
-        <div id="resText" class="resText"></div>
+        <div id="resultContent" class="resText"></div>
         <div class="row">
-          <button id="restart">Take Again</button>
+          <button id="doneBtn">Back to Weeks</button>
         </div>
       </section>
     </main>
@@ -76,7 +83,7 @@
     console.log("Firebase connected successfully!");
   </script>
 
-  <!-- App Script (same as before, no edits) -->
+  <!-- App Script (unchanged) -->
   <script src="app.js"></script>
 </body>
 </html>
