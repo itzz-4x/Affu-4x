@@ -3,55 +3,42 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Princess 4X Practice Portal 💞</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Princess 4X Practice Portal 💖</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDK (no change) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
+
 <body>
-  <div class="wrap">
+  <div class="page romantic-bg">
     <header class="hero">
-      <div class="logo">👑</div>
+      <div class="logo">💗</div>
       <h1>Princess 4X Practice Portal</h1>
     </header>
 
     <main class="main">
       <!-- Start Section -->
-      <section class="card" id="enterSection">
-        <h2>Welcome to NEET Prep 💖</h2>
-        <p>Enter your name to begin your practice journey</p>
-        <input type="text" id="studentName" placeholder="Your full name" />
+      <section class="card" id="start">
+        <h2>Welcome Beautiful Soul ✨</h2>
+        <p>Enter your name and begin your NEET practice with love 💫</p>
+        <input id="studentName" placeholder="Your full name" />
         <div class="row">
-          <button id="enterBtn">Start Test</button>
+          <button id="startBtn">Start Test 💕</button>
         </div>
-      </section>
-
-      <!-- Weeks Section -->
-      <section class="card hidden" id="weeksSection">
-        <h2>Weeks Schedule 🗓️</h2>
-        <div id="weeksContainer" class="weeks-grid"></div>
       </section>
 
       <!-- Exam Section -->
-      <section class="card hidden" id="examSection">
+      <section class="card" id="exam" style="display:none">
         <div class="exam-top">
-          <!-- 🔥 Timer restored exactly like old one -->
-          <div id="timer">
-            ⏰ Time Remaining: <span id="timeDisplay">180:00</span>
-          </div>
-          <div id="examTitle"></div>
+          <div id="timer">⏰ Time Remaining: <span id="timeDisplay">180:00</span></div>
+          <div id="qnum"></div>
         </div>
-
-        <div id="questionArea">
-          <div id="question" class="q-card"></div>
-          <div id="options" class="options"></div>
-        </div>
-
-        <div id="examControls" class="nav">
+        <div id="question" class="question"></div>
+        <div id="opts" class="opts"></div>
+        <div class="nav">
           <button id="prevQ">Previous</button>
           <button id="skipQ">Skip</button>
           <button id="nextQ">Next</button>
@@ -60,21 +47,19 @@
       </section>
 
       <!-- Result Section -->
-      <section class="card hidden" id="resultSection">
-        <h2>🎉 Well Done Princess!</h2>
-        <div id="resultContent"></div>
+      <section class="card" id="result" style="display:none">
+        <h2>Well Done 💐</h2>
+        <div id="resText" class="resText"></div>
         <div class="row">
-          <button id="doneBtn">Take Again</button>
+          <button id="restart">Take Again</button>
         </div>
       </section>
     </main>
 
-    <footer class="foot">
-      Made with 💕 by <b>Princess</b>
-    </footer>
+    <footer class="foot">Made with ❤️ by Princess</footer>
   </div>
 
-  <!-- Firebase Config -->
+  <!-- Firebase Config (unchanged) -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB64KBoank1xHvTkzz4hDPG4Iz8YdGx-Vc",
@@ -88,10 +73,10 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    console.log("🔥 Firebase connected successfully!");
+    console.log("Firebase connected successfully!");
   </script>
 
-  <!-- App Logic -->
+  <!-- App Script (same as before, no edits) -->
   <script src="app.js"></script>
 </body>
 </html>
