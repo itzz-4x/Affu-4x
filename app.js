@@ -1,6 +1,6 @@
 // ✅ Start date for week 1 unlock
-const START_DATE = new Date("2020-01-01T00:00:00");
-const TOTAL_WEEKS = 28;
+const START_DATE = new Date("2025-10-20T00:00:00");
+const TOTAL_WEEKS = 28; // ✅ 20 se 28 kardia
 const QUESTIONS_PER_WEEK = 180;
 
 // 🧩 DOM elements
@@ -210,8 +210,10 @@ function updateTimerDisplay() {
     }
 }
 
-// ✅ Load questions dynamically
+// ✅ Load questions dynamically - ONLY EXTERNAL FILES (NO TEMPORARY QUESTIONS)
 function loadWeek(weekNumber) {
+    console.log(`Loading week ${weekNumber} from external file...`);
+    
     loadedQuestions = [];
     answers = [];
     currIndex = 0;
@@ -245,7 +247,7 @@ function loadWeek(weekNumber) {
                 <div style="text-align: center; padding: 50px;">
                     <h3>⚠️ Questions Not Available</h3>
                     <p>Week ${weekNumber} questions file is not found or empty.</p>
-                    <p>Please add questions to questions/week${weekNumber}.js</p>
+                    <p>Please contact administrator.</p>
                 </div>
             `;
         }
@@ -361,4 +363,4 @@ function escapeHtml(s) {
     return String(s).replace(/[&<>"'`]/g, c => (
         { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c]
     ));
-            }
+                }
