@@ -24,7 +24,7 @@
       <section class="card" id="enterSection">
         <h2>Welcome to NEET Prep 💖</h2>
         <p>Enter your name to begin your practice journey</p>
-        <input type="text" id="studentName" placeholder="Your full name">
+        <input type="text" id="studentName" placeholder="Your full name" />
         <div class="row">
           <button id="enterBtn">Start Test</button>
         </div>
@@ -39,7 +39,10 @@
       <!-- Exam Section -->
       <section class="card hidden" id="examSection">
         <div class="exam-top">
-          <div id="timer">⏰ 03:00:00</div>
+          <!-- 🔥 Timer restored exactly like old one -->
+          <div id="timer">
+            ⏰ Time Remaining: <span id="timeDisplay">180:00</span>
+          </div>
           <div id="examTitle"></div>
         </div>
 
