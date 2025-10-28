@@ -1,99 +1,311 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NEET Practice Portal</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Princess 4X Practice Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   
-  <!-- ✅ FIREBASE SDK - EK HI BAAR -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  
+  <style>
+    /* ROMANTIC THEME CSS */
+    :root {
+      --primary: #ff6b9d;
+      --secondary: #ff9ec0;
+      --accent: #ff3d7f;
+      --light: #fff0f5;
+      --dark: #d63384;
+      --text: #8a2be2;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fff0f5, #ffe4ec);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .hero {
+      text-align: center;
+      padding: 20px 0;
+    }
+    
+    .logo {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+    
+    h1 {
+      color: var(--dark);
+      font-size: 2.2rem;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(214, 51, 132, 0.2);
+    }
+    
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(255, 107, 157, 0.2);
+      border: 2px solid var(--secondary);
+      margin-bottom: 20px;
+    }
+    
+    h2 {
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid var(--secondary);
+      border-radius: 12px;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+    
+    .row {
+      display: flex;
+      justify-content: center;
+    }
+    
+    button {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 5px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+    }
+    
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    /* Weeks Grid */
+    .weeks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .week-card {
+      background: var(--light);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      border: 2px solid var(--secondary);
+      transition: all 0.3s ease;
+    }
+    
+    .week-card.unlocked {
+      background: linear-gradient(135deg, #fff, var(--light));
+    }
+    
+    .week-card.locked {
+      background: #f8f9fa;
+      border-color: #ddd;
+      color: #999;
+    }
+    
+    .week-card h3 {
+      margin: 0 0 10px 0;
+      color: var(--text);
+    }
+    
+    .week-card.unlocked:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(255, 107, 157, 0.3);
+    }
+    
+    /* Exam Styles */
+    .exam-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    #timeDisplay {
+      background: var(--light);
+      color: var(--dark);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .q-card {
+      background: var(--light);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      border: 1px solid var(--secondary);
+    }
+    
+    .options {
+      margin-top: 15px;
+    }
+    
+    .opt {
+      padding: 15px;
+      margin: 10px 0;
+      border: 2px solid var(--secondary);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+    }
+    
+    .opt:hover {
+      border-color: var(--primary);
+      background: var(--light);
+    }
+    
+    .opt.selected {
+      border-color: var(--primary);
+      background: var(--light);
+      font-weight: bold;
+    }
+    
+    .exam-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    
+    /* Result Styles */
+    .result-details {
+      text-align: center;
+    }
+    
+    .result-details p {
+      margin: 10px 0;
+      font-size: 1.1rem;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .foot {
+      text-align: center;
+      margin-top: auto;
+      padding: 20px 0;
+      color: var(--dark);
+      font-weight: 600;
+    }
+    
+    #userBadge {
+      background: var(--light);
+      color: var(--dark);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: 600;
+      margin-top: 10px;
+      display: inline-block;
+    }
+  </style>
 </head>
 <body>
-  <!-- Background Design -->
-  <div class="background">
-    <div class="floating-shapes">
-      <div class="shape shape-1"></div>
-      <div class="shape shape-2"></div>
-      <div class="shape shape-3"></div>
-      <div class="shape shape-4"></div>
-    </div>
-  </div>
-
-  <div class="wrap">
-    <header>
-      <h1>NEET Practice Portal</h1>
-      <div id="userBadge" class="hidden"></div>
-    </header>
-
-    <main id="main">
-      <section id="enterSection">
-        <!-- ✅ EK HI INPUT & BUTTON -->
-        <div class="welcome-card">
-          <h2>Welcome to NEET Prep</h2>
-          <p>Enter your name to begin your practice journey</p>
-          <div class="input-group">
-            <input type="text" id="studentName" placeholder="Enter your full name" />
-            <button id="enterBtn">Start Learning</button>
-          </div>
-        </div>
-      </section>
-
-      <section id="weeksSection" class="hidden">
-        <h2>Weeks Schedule</h2>
-        <div id="weeksContainer" class="weeks-grid"></div>
-      </section>
-
-      <section id="examSection" class="hidden">
-        <div id="examHeader">
-          <button id="backToWeeks">← Back</button>
-          <h2 id="examTitle">Week</h2>
-        </div>
-
-        <!-- Timer -->
-        <div id="timer">
-          ⏰ Time Remaining: <span id="timeDisplay">180:00</span>
-        </div>
-
-        <div id="questionArea"></div>
-        <div id="examControls">
-          <button id="prevQ">Previous</button>
-          <button id="skipQ">Skip</button>
-          <button id="nextQ">Next</button>
-          <button id="submitExam">Submit</button>
-        </div>
-      </section>
-
-      <section id="resultSection" class="hidden">
-        <h2>Result</h2>
-        <div id="resultContent"></div>
-        <button id="doneBtn">Done</button>
-      </section>
-    </main>
-  </div>
-
-  <!-- ✅ FIREBASE CONFIG - EK HI BAAR -->
-  <script>
-    // Check if already initialized
-    if (!firebase.apps.length) {
-      const firebaseConfig = {
-        apiKey: "AIzaSyB64KBoank1xHvTkzz4hDPG4Iz8YdGx-Vc",
-        authDomain: "princess-4x.firebaseapp.com",
-        projectId: "princess-4x",
-        storageBucket: "princess-4x.firebasestorage.app",
-        messagingSenderId: "796593115129",
-        appId: "1:796593115129:web:41ee6606da34b871553728",
-        measurementId: "G-2Y3VGK1CN5"
-      };
-      firebase.initializeApp(firebaseConfig);
-      console.log("✅ Firebase connected successfully!");
-    } else {
-      console.log("✅ Firebase already connected!");
-    }
-  </script>
+<div class="page">
+  <header class="hero">
+    <div class="logo">👑</div>
+    <h1>Princess 4X Practice Portal</h1>
+    <div id="userBadge" class="hidden"></div>
+  </header>
   
-  <script src="app.js"></script>
+  <main class="main">
+    <!-- Enter Section -->
+    <section class="card" id="enterSection">
+      <h2>Welcome to NEET Prep 💖</h2>
+      <p style="text-align: center; color: var(--text); margin-bottom: 20px;">Enter your name to begin your practice journey</p>
+      <input id="studentName" placeholder="Enter your full name">
+      <div class="row">
+        <button id="enterBtn">Start Learning</button>
+      </div>
+    </section>
+    
+    <!-- Weeks Section -->
+    <section class="card hidden" id="weeksSection">
+      <h2>Weekly Practice Tests</h2>
+      <div id="weeksContainer" class="weeks-grid"></div>
+    </section>
+    
+    <!-- Exam Section -->
+    <section class="card hidden" id="examSection">
+      <div class="exam-header">
+        <button id="backToWeeks">← Back to Weeks</button>
+        <div id="timeDisplay">03:00:00</div>
+      </div>
+      <h2 id="examTitle">Week Exam</h2>
+      <div id="questionArea"></div>
+      <div class="exam-controls">
+        <button id="prevQ">Previous</button>
+        <button id="skipQ">Skip</button>
+        <button id="nextQ">Next</button>
+        <button id="submitExam">Submit Exam</button>
+      </div>
+    </section>
+    
+    <!-- Result Section -->
+    <section class="card hidden" id="resultSection">
+      <h2>Exam Completed! 🎉</h2>
+      <div id="resultContent"></div>
+      <div class="row">
+        <button id="doneBtn">Back to Weeks</button>
+      </div>
+    </section>
+  </main>
+  
+  <footer class="foot">Made By Princess ❤️ </footer>
+</div>
+
+<!-- Firebase Configuration -->
+<script>
+  if (!firebase.apps.length) {
+    const firebaseConfig = {
+      apiKey: "AIzaSyB64KBoank1xHvTkzz4hDPG4Iz8YdGx-Vc",
+      authDomain: "princess-4x.firebaseapp.com",
+      projectId: "princess-4x",
+      storageBucket: "princess-4x.firebasestorage.app",
+      messagingSenderId: "796593115129",
+      appId: "1:796593115129:web:41ee6606da34b871553728",
+      measurementId: "G-2Y3VGK1CN5"
+    };
+    firebase.initializeApp(firebaseConfig);
+    console.log("✅ Firebase connected successfully!");
+  }
+</script>
+
+<script src="app.js"></script>
 </body>
-</html>
+  </html>
