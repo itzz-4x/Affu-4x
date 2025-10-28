@@ -5,15 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>NEET Practice Portal</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Firebase SDK (use script option) -->
- <!-- ✅ Firebase v8 compat version -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-<!-- ✅ Firebase Config must be before app.js -->
-<script src="firebase-config.js"></script>
-  <!-- Firebase SDK -->
+  
+  <!-- ✅ FIREBASE SDK - EK HI BAAR -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -37,8 +30,7 @@
 
     <main id="main">
       <section id="enterSection">
-        <input id="studentName" placeholder="Enter your name" />
-        <button id="enterBtn">Enter</button>
+        <!-- ✅ EK HI INPUT & BUTTON -->
         <div class="welcome-card">
           <h2>Welcome to NEET Prep</h2>
           <p>Enter your name to begin your practice journey</p>
@@ -60,9 +52,7 @@
           <h2 id="examTitle">Week</h2>
         </div>
 
-        <!-- YAHAN TIMER ADD KIYA HAI -->
-        <div id="timer" style="text-align: center; font-size: 20px; font-weight: bold; margin: 15px 0; padding: 10px; background: #f0f8ff; border-radius: 8px; border: 2px solid #007bff;">
-        <!-- Timer without white box -->
+        <!-- Timer -->
         <div id="timer">
           ⏰ Time Remaining: <span id="timeDisplay">180:00</span>
         </div>
@@ -84,22 +74,26 @@
     </main>
   </div>
 
-  <!-- Firebase Config -->
+  <!-- ✅ FIREBASE CONFIG - EK HI BAAR -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB64KBoank1xHvTkzz4hDPG4Iz8YdGx-Vc",
-      authDomain: "princess-4x.firebaseapp.com",
-      projectId: "princess-4x",
-      storageBucket: "princess-4x.firebasestorage.app",
-      messagingSenderId: "796593115129",
-      appId: "1:796593115129:web:41ee6606da34b871553728",
-      measurementId: "G-2Y3VGK1CN5"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    console.log("Firebase connected successfully!");
+    // Check if already initialized
+    if (!firebase.apps.length) {
+      const firebaseConfig = {
+        apiKey: "AIzaSyB64KBoank1xHvTkzz4hDPG4Iz8YdGx-Vc",
+        authDomain: "princess-4x.firebaseapp.com",
+        projectId: "princess-4x",
+        storageBucket: "princess-4x.firebasestorage.app",
+        messagingSenderId: "796593115129",
+        appId: "1:796593115129:web:41ee6606da34b871553728",
+        measurementId: "G-2Y3VGK1CN5"
+      };
+      firebase.initializeApp(firebaseConfig);
+      console.log("✅ Firebase connected successfully!");
+    } else {
+      console.log("✅ Firebase already connected!");
+    }
   </script>
+  
   <script src="app.js"></script>
 </body>
 </html>
