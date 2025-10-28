@@ -340,23 +340,31 @@ async function submitExam() {
         </div>
     `;
 
-    // Save to Firebase
-    try {
-        await firebase.firestore().collection('Results').add({
-            Name: name,
-            Week: parseInt(weekNumber),
-            Correct: correct,
-            Wrong: wrong,
-            Skipped: skipped,
-            Marks: marks,
-            TotalMarks: totalMarks,
-            Percentage: percentage,
-            Timestamp: new Date().toISOString()
-        });
-        console.log("✅ Result saved to Firebase!");
-    } catch (err) {
-        console.log("Result saved locally");
-    }
+ // ✅ Save to Firebase with Indian Time
+try {
+    await firebase.firestore().collection('Results').add({
+        Name: name,
+        Week: parseInt(weekNumber),
+        Correct: correct,
+        Wrong: wrong,
+        Skipped: skipped,
+        Marks: marks,
+        TotalMarks: totalMarks,
+        Percentage: percentage,
+        Timestamp: new Date().toLocaleString('en-IN', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        })
+    });
+    console.log("✅ Result saved to Firebase with Indian Time!");
+} catch (err) {
+    console.log("Result saved locally");
+}
 }
 
 function escapeHtml(s) {
