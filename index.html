@@ -32,7 +32,7 @@
     .page {
       max-width: 900px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 15px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -40,43 +40,44 @@
     
     .hero {
       text-align: center;
-      padding: 20px 0;
+      padding: 15px 0;
     }
     
     .logo {
-      font-size: 3rem;
-      margin-bottom: 10px;
+      font-size: 2.5rem;
+      margin-bottom: 8px;
     }
     
     h1 {
       color: var(--dark);
-      font-size: 2.2rem;
+      font-size: 1.8rem;
       margin: 0;
       text-shadow: 2px 2px 4px rgba(214, 51, 132, 0.2);
     }
     
     .card {
       background: white;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 10px 30px rgba(255, 107, 157, 0.2);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(255, 107, 157, 0.2);
       border: 2px solid var(--secondary);
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
     
     h2 {
       color: var(--text);
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+      font-size: 1.4rem;
     }
     
     input {
       width: 100%;
-      padding: 15px;
+      padding: 12px;
       border: 2px solid var(--secondary);
-      border-radius: 12px;
-      font-size: 1.1rem;
-      margin-bottom: 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 15px;
       box-sizing: border-box;
     }
     
@@ -89,13 +90,15 @@
       background: linear-gradient(135deg, var(--primary), var(--accent));
       color: white;
       border: none;
-      padding: 12px 25px;
-      border-radius: 12px;
-      font-size: 1rem;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
-      margin: 5px;
+      margin: 3px;
+      flex: 1;
+      min-width: 60px;
     }
     
     button:hover {
@@ -109,18 +112,50 @@
       transform: none;
     }
     
+    /* Mobile-first responsive buttons */
+    .exam-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 15px;
+      justify-content: center;
+    }
+    
+    .exam-controls button {
+      flex: 1 1 calc(50% - 10px);
+      min-width: 120px;
+      max-width: 200px;
+    }
+    
+    /* For very small screens */
+    @media (max-width: 480px) {
+      .exam-controls button {
+        flex: 1 1 100%;
+        min-width: 100%;
+        margin: 2px 0;
+      }
+    }
+    
+    /* For larger screens */
+    @media (min-width: 768px) {
+      .exam-controls button {
+        flex: 1;
+        min-width: 80px;
+      }
+    }
+    
     /* Weeks Grid */
     .weeks-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 15px;
     }
     
     .week-card {
       background: var(--light);
-      border-radius: 15px;
-      padding: 20px;
+      border-radius: 12px;
+      padding: 15px;
       text-align: center;
       border: 2px solid var(--secondary);
       transition: all 0.3s ease;
@@ -137,13 +172,14 @@
     }
     
     .week-card h3 {
-      margin: 0 0 10px 0;
+      margin: 0 0 8px 0;
       color: var(--text);
+      font-size: 1.1rem;
     }
     
     .week-card.unlocked:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(255, 107, 157, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(255, 107, 157, 0.3);
     }
     
     /* Exam Styles */
@@ -151,35 +187,37 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     
     #timeDisplay {
       background: var(--light);
       color: var(--dark);
-      padding: 10px 20px;
-      border-radius: 10px;
+      padding: 8px 15px;
+      border-radius: 8px;
       font-weight: bold;
-      font-size: 1.1rem;
+      font-size: 1rem;
     }
     
     .q-card {
       background: var(--light);
-      padding: 20px;
-      border-radius: 15px;
-      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
       border: 1px solid var(--secondary);
     }
     
     .options {
-      margin-top: 15px;
+      margin-top: 12px;
     }
     
     .opt {
-      padding: 15px;
-      margin: 10px 0;
+      padding: 12px;
+      margin: 8px 0;
       border: 2px solid var(--secondary);
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s ease;
       background: white;
@@ -196,20 +234,14 @@
       font-weight: bold;
     }
     
-    .exam-controls {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-    
     /* Result Styles */
     .result-details {
       text-align: center;
     }
     
     .result-details p {
-      margin: 10px 0;
-      font-size: 1.1rem;
+      margin: 8px 0;
+      font-size: 1rem;
     }
     
     .hidden {
@@ -219,7 +251,7 @@
     .foot {
       text-align: center;
       margin-top: auto;
-      padding: 20px 0;
+      padding: 15px 0;
       color: var(--dark);
       font-weight: 600;
     }
@@ -227,13 +259,62 @@
     #userBadge {
       background: var(--light);
       color: var(--dark);
-      padding: 10px 20px;
-      border-radius: 20px;
+      padding: 8px 15px;
+      border-radius: 15px;
       font-weight: 600;
-      margin-top: 10px;
+      margin-top: 8px;
       display: inline-block;
+      font-size: 0.9rem;
     }
-  </style>
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .page {
+        padding: 10px;
+      }
+      
+      .card {
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      h2 {
+        font-size: 1.2rem;
+      }
+      
+      .exam-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      #backToWeeks {
+        order: 2;
+        margin-top: 10px;
+      }
+      
+      #timeDisplay {
+        order: 1;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .weeks-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 8px;
+      }
+      
+      .week-card {
+        padding: 12px;
+      }
+      
+      .week-card h3 {
+        font-size: 1rem;
+      }
+    }
+        </style>
 </head>
 <body>
 <div class="page">
